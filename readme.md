@@ -30,8 +30,10 @@ composer require airslate/laravel-datadog
 
 ### Setting service provider
 
-Append Service Providers (usually the `config/app.php` file) as follows:
+**!!This package provide auto discovery for service provider!!** 
 
+But also you can manually add service provider.
+Append service providers (usually the `config/app.php` file) as follows:
 ```php
 'providers' => [
     //  ...
