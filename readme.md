@@ -29,25 +29,17 @@ composer require airslate/laravel-datadog
 ```
 
 ### Setting service provider
+**This package provide auto discovery for service provider** 
 
-**!!This package provide auto discovery for service provider!!** 
 
-But also you can manually add service provider.
-Append service providers (usually the `config/app.php` file) as follows:
-```php
-'providers' => [
-    //  ...
-    AirSlate\Core\ServiceProviders\DataDogProvider::class,
-]
-```
-
-Next publish client configuration:
+### Publish client configuration:
 
 ```bash
 php artisan vendor:publish --tag=datadog
 ```
 
-Add middleware. Datadog middleware must be last in your middleware list.
+### Add middleware. 
+Datadog middleware must be last in your middleware list.
 
 ```php
 $middleware = [
