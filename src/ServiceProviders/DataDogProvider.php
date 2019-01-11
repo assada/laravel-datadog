@@ -45,15 +45,20 @@ class DataDogProvider extends ServiceProvider
     {
         $this->app->make('router')->matched(function (RouteMatched $matched) {
             $operationName = sprintf(
-                '%s %s %s',
+                '%s/%s/%s',
                 strtoupper($matched->request->getScheme()),
                 $matched->request->method(),
                 $matched->route->uri
             );
 
+            $config = Container::getInstance()->get('config');
+
             /** @var Datadog $datadog */
             $datadog = Container::getInstance()->make(Datadog::class);
             $datadog->addTag('url', $operationName);
+            if (isset($config['application'])) {
+                $datadog->addTag('app', $config['application']);
+            }
             return $operationName;
         });
     }

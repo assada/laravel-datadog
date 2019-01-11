@@ -4,8 +4,8 @@ namespace AirSlate\Datadog\Http\Middleware;
 
 use Illuminate\Container\Container;
 use AirSlate\Datadog\Services\Datadog;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class DatadogMiddlware
 {
@@ -20,6 +20,12 @@ class DatadogMiddlware
         $this->dataDog = Container::getInstance()->make(Datadog::class);
     }
 
+    /**
+     * @param Request $request
+     * @param $next
+     *
+     * @return mixed
+     */
     public function handle(Request $request, $next)
     {
         $startTimer = microtime(true);
@@ -28,7 +34,12 @@ class DatadogMiddlware
         return $response;
     }
 
-    private function sendMetrics(Request $request, JsonResponse $response, float $startTimer = null): void
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param float|null $startTimer
+     */
+    private function sendMetrics(Request $request, Response $response, float $startTimer = null): void
     {
         $start = \defined('LARAVEL_START') ? LARAVEL_START : $startTimer;
         $duration = microtime(true) - $start;
