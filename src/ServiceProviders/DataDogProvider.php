@@ -3,7 +3,6 @@
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Services\Datadog;
-use Illuminate\Container\Container;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,15 +19,23 @@ class DataDogProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->singleton(Datadog::class, function ($app) {
-            $config = $app->get('config')->get('datadog');
+        $config = $this->app->get('config')->get('datadog');
+
+        $this->app->singleton(Datadog::class, function() use ($config) {
             return new Datadog([
                 'host' => $config['statsd_server'] ?? '172.17.0.1',
                 'port' => $config['statsd_port'] ?? 8125,
             ]);
         });
-        
-        $this->registerRouteMatchedListener();
+
+        /** @var Datadog $datadog */
+        $datadog = $this->app->get(Datadog::class);
+
+        if (isset($config['application'])) {
+            $datadog->addTag('app', $config['application']);
+        }
+
+        $this->registerRouteMatchedListener($datadog);
     }
 
     /**
@@ -41,9 +48,12 @@ class DataDogProvider extends ServiceProvider
         return \dirname(__DIR__) . '/config/datadog.php';
     }
 
-    private function registerRouteMatchedListener(): void
+    /**
+     * @param Datadog $datadog
+     */
+    private function registerRouteMatchedListener(Datadog $datadog): void
     {
-        $this->app->make('router')->matched(function (RouteMatched $matched) {
+        $this->app->make('router')->matched(function(RouteMatched $matched) use ($datadog) {
             $operationName = sprintf(
                 '%s/%s/%s',
                 strtoupper($matched->request->getScheme()),
@@ -51,14 +61,8 @@ class DataDogProvider extends ServiceProvider
                 $matched->route->uri
             );
 
-            $config = Container::getInstance()->get('config');
-
-            /** @var Datadog $datadog */
-            $datadog = Container::getInstance()->make(Datadog::class);
             $datadog->addTag('url', $operationName);
-            if (isset($config['application'])) {
-                $datadog->addTag('app', $config['application']);
-            }
+
             return $operationName;
         });
     }
