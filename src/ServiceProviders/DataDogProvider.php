@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace AirSlate\Datadog\ServiceProviders;
 
@@ -6,6 +7,11 @@ use AirSlate\Datadog\Services\Datadog;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class DataDogProvider
+ *
+ * @package AirSlate\Datadog\ServiceProviders
+ */
 class DataDogProvider extends ServiceProvider
 {
     public function boot()

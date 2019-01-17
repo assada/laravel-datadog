@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace AirSlate\Datadog\Http\Middleware;
 
@@ -7,6 +8,11 @@ use AirSlate\Datadog\Services\Datadog;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Class DatadogMiddlware
+ *
+ * @package AirSlate\Datadog\Http\Middleware
+ */
 class DatadogMiddlware
 {
 
