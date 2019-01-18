@@ -20,10 +20,10 @@ class EventServiceProvider extends ServiceProvider
         $dispatcher = $this->app->get(Dispatcher::class);
 
         $dispatcher->listen([
-            'AirSlate\Event\Events\Processed',
-            'AirSlate\Event\Events\Rejected',
-            'AirSlate\Event\Events\Retried',
-            'AirSlate\Event\Events\Send',
+            'AirSlate\Event\Events\ProcessedEvent',
+            'AirSlate\Event\Events\RejectedEvent',
+            'AirSlate\Event\Events\RetriedEvent',
+            'AirSlate\Event\Events\SendEvent',
             'AirSlate\Event\Events\SendToQueueEvent',
         ], EventBusListener::class);
     }
