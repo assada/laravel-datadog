@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Listeners\EventBusListener;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Events\Dispatcher;
 
 /**
  * Class EventServiceProvider
