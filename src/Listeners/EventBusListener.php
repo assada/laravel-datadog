@@ -56,7 +56,7 @@ class EventBusListener
                 'key' => $event->getRoutingKey(),
             ]);
         } elseif ($event instanceof \AirSlate\Event\Events\SendToQueueEvent) {
-            $this->datadog->increment('eventbus.send', 1, [
+            $this->datadog->increment('eventbus.sendtoqueue', 1, [
                 'queue' => $event->getQueueName(),
             ]);
         }
