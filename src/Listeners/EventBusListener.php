@@ -34,29 +34,29 @@ class EventBusListener
     public function handle($event) : void
     {
         if ($event instanceof \AirSlate\Event\Events\ProcessedEvent) {
-            $this->datadog->increment('eventbus.receive', 1, [
+            $this->datadog->increment('app.eventbus.receive', 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'processed',
             ]);
         } elseif ($event instanceof \AirSlate\Event\Events\RejectedEvent) {
-            $this->datadog->increment('eventbus.receive', 1, [
+            $this->datadog->increment('app.eventbus.receive', 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'rejected',
             ]);
         } elseif ($event instanceof \AirSlate\Event\Events\RejectedEvent) {
-            $this->datadog->increment('eventbus.receive', 1, [
+            $this->datadog->increment('app.eventbus.receive', 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'retried',
             ]);
         } elseif ($event instanceof \AirSlate\Event\Events\SendEvent) {
-            $this->datadog->increment('eventbus.send', 1, [
+            $this->datadog->increment('app.ventbus.send', 1, [
                 'key' => $event->getRoutingKey(),
             ]);
         } elseif ($event instanceof \AirSlate\Event\Events\SendToQueueEvent) {
-            $this->datadog->increment('eventbus.sendtoqueue', 1, [
+            $this->datadog->increment('app.eventbus.sendtoqueue', 1, [
                 'queue' => $event->getQueueName(),
             ]);
         }

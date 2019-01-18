@@ -8,11 +8,11 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Class DataDogProvider
+ * Class DatadogProvider
  *
  * @package AirSlate\Datadog\ServiceProviders
  */
-class DataDogProvider extends ServiceProvider
+class DatadogProvider extends ServiceProvider
 {
     public function boot()
     {

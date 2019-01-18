@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "AirSlate\\Datadog\\ServiceProviders\\DataDogProvider",
+                "AirSlate\\Datadog\\ServiceProviders\\DatadogProvider",
                 "AirSlate\\Datadog\\ServiceProviders\\EventServiceProvider"
             ]
         }

@@ -9,21 +9,20 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class DatadogMiddlware
+ * Class DatadogMiddleware
  *
  * @package AirSlate\Datadog\Http\Middleware
  */
-class DatadogMiddlware
+class DatadogMiddleware
 {
-
     /**
      * @var Datadog
      */
-    private $dataDog;
+    private $datadog;
 
     public function __construct()
     {
-        $this->dataDog = Container::getInstance()->make(Datadog::class);
+        $this->datadog = Container::getInstance()->make(Datadog::class);
     }
 
     /**
@@ -55,6 +54,6 @@ class DatadogMiddlware
             'method' => $request->method(),
         ];
 
-        $this->dataDog->timing('request_time', $duration, 1, $tags);
+        $this->dataDog->timing('app.response', $duration, 1, $tags);
     }
 }
