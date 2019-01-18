@@ -22,6 +22,7 @@ class DatadogMiddleware
 
     public function __construct()
     {
+
         $this->datadog = Container::getInstance()->make(Datadog::class);
     }
 
@@ -54,6 +55,6 @@ class DatadogMiddleware
             'method' => $request->method(),
         ];
 
-        $this->dataDog->timing('app.response', $duration, 1, $tags);
+        $this->datadog->timing('app.response', $duration, 1, $tags);
     }
 }
