@@ -52,9 +52,15 @@ class DatadogMiddleware
         $tags = [
             'code' => $response->getStatusCode(),
             'method' => $request->method(),
-            'size' => strlen($response->getContent()),
         ];
 
-        $this->datadog->timing('airslate.response', $duration, 1, $tags);
+        // send response size
+        $this->datadog->gauge('airslate.request_size', strlen($request->getContent()), 1, $tags);
+
+        // send response size
+        $this->datadog->gauge('airslate.response_size', strlen($response->getContent()), 1, $tags);
+
+        // send response time
+        $this->datadog->timing('airslate.response_time', $duration, 1, $tags);
     }
 }
