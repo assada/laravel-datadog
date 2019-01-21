@@ -25,6 +25,10 @@ class EventServiceProvider extends ServiceProvider
             'AirSlate\Event\Events\RetriedEvent',
             'AirSlate\Event\Events\SendEvent',
             'AirSlate\Event\Events\SendToQueueEvent',
+            'Illuminate\Queue\Events\JobProcessing',
+            'Illuminate\Queue\Events\JobProcessed',
+            'Illuminate\Queue\Events\JobExceptionOccurred',
+            'Illuminate\Queue\Events\JobFailed',
         ], EventBusListener::class);
     }
 }

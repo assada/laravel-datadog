@@ -59,6 +59,30 @@ class EventBusListener
             $this->datadog->increment('airslate.eventbus.sendtoqueue', 1, [
                 'queue' => $event->getQueueName(),
             ]);
+        } elseif ($event instanceof \Illuminate\Queue\Events\JobProcessing) {
+            $this->datadog->increment('airslate.queue.processed', 1, [
+                'name' => $event->job->getName(),
+                'queue' => $event->job->getQueue(),
+                'connection' => $event->job->getConnectionName(),
+            ]);
+        } elseif ($event instanceof \Illuminate\Queue\Events\JobProcessed) {
+            $this->datadog->increment('airslate.queue.processed', 1, [
+                'name' => $event->job->getName(),
+                'queue' => $event->job->getQueue(),
+                'connection' => $event->job->getConnectionName(),
+            ]);
+        } elseif ($event instanceof \Illuminate\Queue\Events\JobExceptionOccurred) {
+            $this->datadog->increment('airslate.queue.processed', 1, [
+                'name' => $event->job->getName(),
+                'queue' => $event->job->getQueue(),
+                'connection' => $event->job->getConnectionName(),
+            ]);
+        } elseif ($event instanceof \Illuminate\Queue\Events\JobFailed) {
+            $this->datadog->increment('airslate.queue.processed', 1, [
+                'name' => $event->job->getName(),
+                'queue' => $event->job->getQueue(),
+                'connection' => $event->job->getConnectionName(),
+            ]);
         }
     }
 }
