@@ -27,19 +27,18 @@ class DatadogProvider extends ServiceProvider
     {
         $config = $this->app->get('config')->get('datadog');
 
-        $this->app->singleton(Datadog::class, function() use ($config) {
-            return new Datadog([
-                'host' => $config['statsd_server'] ?? '172.17.0.1',
-                'port' => $config['statsd_port'] ?? 8125,
-            ]);
+        $datadog = new Datadog([
+            'host' => $config['statsd_server'] ?? '172.17.0.1',
+            'port' => $config['statsd_port'] ?? 8125,
+        ]);
+
+        $this->app->singleton(Datadog::class, function() use ($datadog) {
+            return $datadog;
         });
 
-        /** @var Datadog $datadog */
-        $datadog = $this->app->get(Datadog::class);
-
-        if (isset($config['application'])) {
-            $datadog->addTag('app', $config['application']);
-        }
+        $datadog->addTag('env', $config['environment']);
+        $datadog->addTag('app', $config['application_name']);
+        $datadog->addTag('ver', $config['application_version']);
 
         $this->registerRouteMatchedListener($datadog);
     }
