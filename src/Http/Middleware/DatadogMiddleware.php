@@ -22,7 +22,6 @@ class DatadogMiddleware
 
     public function __construct()
     {
-
         $this->datadog = Container::getInstance()->make(Datadog::class);
     }
 
@@ -51,10 +50,11 @@ class DatadogMiddleware
         $duration = microtime(true) - $start;
 
         $tags = [
-            'status_code' => $response->getStatusCode(),
+            'code' => $response->getStatusCode(),
             'method' => $request->method(),
+            'size' => strlen($response->getContent()),
         ];
 
-        $this->datadog->timing('app.response', $duration, 1, $tags);
+        $this->datadog->timing('airslate.response', $duration, 1, $tags);
     }
 }
