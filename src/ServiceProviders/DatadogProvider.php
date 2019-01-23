@@ -1,13 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Services\Datadog;
-use Illuminate\Container\Container;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
-class DataDogProvider extends ServiceProvider
+/**
+ * Class DatadogProvider
+ *
+ * @package AirSlate\Datadog\ServiceProviders
+ */
+class DatadogProvider extends ServiceProvider
 {
     public function boot()
     {
@@ -20,15 +25,22 @@ class DataDogProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->singleton(Datadog::class, function ($app) {
-            $config = $app->get('config')->get('datadog');
-            return new Datadog([
-                'host' => $config['statsd_server'] ?? '172.17.0.1',
-                'port' => $config['statsd_port'] ?? 8125,
-            ]);
+        $config = $this->app->get('config')->get('datadog');
+
+        $datadog = new Datadog([
+            'host' => $config['statsd_server'] ?? '172.17.0.1',
+            'port' => $config['statsd_port'] ?? 8125,
+        ]);
+
+        $this->app->singleton(Datadog::class, function() use ($datadog) {
+            return $datadog;
         });
-        
-        $this->registerRouteMatchedListener();
+
+        $datadog->addTag('env', $config['environment']);
+        $datadog->addTag('app', $config['application_name']);
+        $datadog->addTag('ver', $config['application_version']);
+
+        $this->registerRouteMatchedListener($datadog);
     }
 
     /**
@@ -41,19 +53,21 @@ class DataDogProvider extends ServiceProvider
         return \dirname(__DIR__) . '/config/datadog.php';
     }
 
-    private function registerRouteMatchedListener(): void
+    /**
+     * @param Datadog $datadog
+     */
+    private function registerRouteMatchedListener(Datadog $datadog): void
     {
-        $this->app->make('router')->matched(function (RouteMatched $matched) {
+        $this->app->make('router')->matched(function(RouteMatched $matched) use ($datadog) {
             $operationName = sprintf(
-                '%s %s %s',
+                '%s/%s/%s',
                 strtoupper($matched->request->getScheme()),
                 $matched->request->method(),
                 $matched->route->uri
             );
 
-            /** @var Datadog $datadog */
-            $datadog = Container::getInstance()->make(Datadog::class);
             $datadog->addTag('url', $operationName);
+
             return $operationName;
         });
     }

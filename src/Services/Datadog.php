@@ -1,9 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace AirSlate\Datadog\Services;
 
 use DataDog\DogStatsd;
 
+/**
+ * Class Datadog
+ *
+ * @package AirSlate\Datadog\Services
+ */
 class Datadog extends DogStatsd
 {
     private $tags = [];
