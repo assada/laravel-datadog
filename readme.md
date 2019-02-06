@@ -38,6 +38,13 @@ composer require airslate/laravel-datadog
 php artisan vendor:publish --tag=datadog
 ```
 
+### Change environment tag in config/datadog.php
+
+You must set correct environment tag
+```php
+'environment' => explode('-', env('SERVICE_NAME', 'as-dev'))[1],
+```
+
 ### Add middleware. 
 Datadog middleware must be last in your middleware list.
 
@@ -49,16 +56,10 @@ $middleware = [
 ```
 
 ## For local, stand-alone service development
-Add Datadog keys to docker/config/consul/app.yml
+Add Datadog keys to docker/config/env.ctmpl
 ```
-$SERVICE_FAMILY_KV_PATH$/statsd/host: datadog
-$SERVICE_FAMILY_KV_PATH$/statsd/port: 8125
-```
-
-And same keys to docker/config/env.ctmpl
-```
-STATSD_HOST={{ key "SERVICE_FAMILY_KV_PATH/statsd/host" }}
-STATSD_PORT={{ key "SERVICE_FAMILY_KV_PATH/statsd/port" }}
+STATSD_HOST=172.17.0.1
+STATSD_PORT=8125
 ```
 
 Add datadog agent for your docker-compose.yml file
