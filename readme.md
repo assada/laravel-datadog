@@ -48,7 +48,7 @@ $middleware = [
 ];
 ```
 
-## Local development
+## For local, stand-alone service development
 Add Datadog keys to docker/config/consul/app.yml
 ```
 $SERVICE_FAMILY_KV_PATH$/statsd/host: datadog
