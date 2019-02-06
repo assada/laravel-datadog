@@ -45,7 +45,7 @@ class EventBusListener
                 'queue' => $event->getQueueName(),
                 'status' => 'rejected',
             ]);
-        } elseif ($event instanceof \AirSlate\Event\Events\RejectedEvent) {
+        } elseif ($event instanceof \AirSlate\Event\Events\RetryEvent) {
             $this->datadog->increment('airslate.eventbus.receive', 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
