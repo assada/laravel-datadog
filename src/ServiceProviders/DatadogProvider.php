@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Services\Datadog;
+use AirSlate\Datadog\Services\QueueJobMeter;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,7 +15,7 @@ use Illuminate\Support\ServiceProvider;
  */
 class DatadogProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -32,13 +33,15 @@ class DatadogProvider extends ServiceProvider
             'port' => $config['statsd_port'] ?? 8125,
         ]);
 
-        $this->app->singleton(Datadog::class, function() use ($datadog) {
+        $this->app->singleton(Datadog::class, function() use ($datadog): Datadog {
             return $datadog;
         });
 
-        $datadog->addTag('env', $config['environment']);
+        $this->app->singleton(QueueJobMeter::class, function(): QueueJobMeter {
+            return new QueueJobMeter();
+        });
+
         $datadog->addTag('app', $config['application_name']);
-        $datadog->addTag('ver', $config['application_version']);
 
         $this->registerRouteMatchedListener($datadog);
     }
@@ -59,16 +62,7 @@ class DatadogProvider extends ServiceProvider
     private function registerRouteMatchedListener(Datadog $datadog): void
     {
         $this->app->make('router')->matched(function(RouteMatched $matched) use ($datadog) {
-            $operationName = sprintf(
-                '%s/%s/%s',
-                strtoupper($matched->request->getScheme()),
-                $matched->request->method(),
-                $matched->route->uri
-            );
-
-            $datadog->addTag('url', $operationName);
-
-            return $operationName;
+            $datadog->addTag('url', $matched->route->uri);
         });
     }
 }
