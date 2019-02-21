@@ -41,29 +41,29 @@ class EventBusListener
      */
     public function handle($event): void
     {
-        if ($event instanceof \AirSlate\Event\Events\ProcessedEvent) {
+        if ($event instanceof \AirSlate\EventBusHelper\Events\ProcessedEvent) {
             $this->datadog->timing('airslate.eventbus.receive', $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'processed',
             ]);
-        } elseif ($event instanceof \AirSlate\Event\Events\RejectedEvent) {
+        } elseif ($event instanceof \AirSlate\EventBusHelper\Events\RejectedEvent) {
             $this->datadog->timing('airslate.eventbus.receive', $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'rejected',
             ]);
-        } elseif ($event instanceof \AirSlate\Event\Events\RetryEvent) {
+        } elseif ($event instanceof \AirSlate\EventBusHelper\Events\RetryEvent) {
             $this->datadog->timing('airslate.eventbus.receive', $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'retried',
             ]);
-        } elseif ($event instanceof \AirSlate\Event\Events\SendEvent) {
+        } elseif ($event instanceof \AirSlate\EventBusHelper\Events\SendEvent) {
             $this->datadog->increment('airslate.eventbus.send', 1, [
                 'key' => $event->getRoutingKey(),
             ]);
-        } elseif ($event instanceof \AirSlate\Event\Events\SendToQueueEvent) {
+        } elseif ($event instanceof \AirSlate\EventBusHelper\Events\SendToQueueEvent) {
             $this->datadog->increment('airslate.eventbus.sendtoqueue', 1, [
                 'queue' => $event->getQueueName(),
             ]);
