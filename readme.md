@@ -71,3 +71,23 @@ datadog:
       SD_BACKEND: docker
       NON_LOCAL_TRAFFIC: "true"
 ```
+
+## Datadog metrics
+
+### airslate.eventbus.receive(time)
+
+key - key name
+queue - queue name
+status - processing status(processed, rejected, retried)
+
+### airslate.eventbus.send(int)
+
+key - key name
+
+### airslate.eventbus.sendtoqueue
+
+queue - queue name
+
+### airslate.queue.job(time)
+
+status - processing status(processed, exceptionOccurred, failed)
