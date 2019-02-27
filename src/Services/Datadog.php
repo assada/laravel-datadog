@@ -19,7 +19,7 @@ class Datadog extends DogStatsd
      */
     public function send($data, $sampleRate = 1.0, $tags = null): void
     {
-        $tags = $this->prepareTags($tags);
+        $tags = $this->prepareTags(is_array($tags) ? $tags : null);
         parent::send($data, $sampleRate, $tags);
     }
 
