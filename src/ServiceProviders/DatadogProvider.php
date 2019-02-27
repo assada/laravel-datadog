@@ -7,6 +7,7 @@ use AirSlate\Datadog\Services\Datadog;
 use AirSlate\Datadog\Services\QueueJobMeter;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
  * Class DatadogProvider
@@ -15,6 +16,9 @@ use Illuminate\Support\ServiceProvider;
  */
 class DatadogProvider extends ServiceProvider
 {
+    /**
+     * @throws BindingResolutionException
+     */
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
@@ -24,6 +28,9 @@ class DatadogProvider extends ServiceProvider
         $this->mergeConfigFrom($this->configPath(), 'datadog');
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function register(): void
     {
         $config = $this->app->get('config')->get('datadog');
@@ -33,11 +40,11 @@ class DatadogProvider extends ServiceProvider
             'port' => $config['statsd_port'] ?? 8125,
         ]);
 
-        $this->app->singleton(Datadog::class, function() use ($datadog): Datadog {
+        $this->app->singleton(Datadog::class, function () use ($datadog): Datadog {
             return $datadog;
         });
 
-        $this->app->singleton(QueueJobMeter::class, function(): QueueJobMeter {
+        $this->app->singleton(QueueJobMeter::class, function (): QueueJobMeter {
             return new QueueJobMeter();
         });
 
@@ -58,10 +65,12 @@ class DatadogProvider extends ServiceProvider
 
     /**
      * @param Datadog $datadog
+     *
+     * @throws BindingResolutionException
      */
     private function registerRouteMatchedListener(Datadog $datadog): void
     {
-        $this->app->make('router')->matched(function(RouteMatched $matched) use ($datadog) {
+        $this->app->make('router')->matched(function (RouteMatched $matched) use ($datadog) {
             $datadog->addTag('url', $matched->route->uri);
         });
     }
