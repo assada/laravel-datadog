@@ -31,6 +31,7 @@ composer require airslate/laravel-datadog
 ### Setting service provider
 **This package provide auto discovery for service provider** 
 
+If Laravel package auto-discovery is disabled, add service providers manually.
 
 ### Publish client configuration:
 
