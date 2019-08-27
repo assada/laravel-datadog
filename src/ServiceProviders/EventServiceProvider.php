@@ -29,6 +29,15 @@ class EventServiceProvider extends ServiceProvider
             'Illuminate\Queue\Events\JobProcessed',
             'Illuminate\Queue\Events\JobExceptionOccurred',
             'Illuminate\Queue\Events\JobFailed',
+            'Illuminate\Database\Events\CacheEvent',
+            'Illuminate\Database\Events\CacheHit',
+            'Illuminate\Database\Events\CacheMissed',
+            'Illuminate\Database\Events\KeyForgotten',
+            'Illuminate\Database\Events\KeyWritten',
+            'Illuminate\Database\Database\QueryExecuted',
+            'Illuminate\Database\Database\TransactionBeginning',
+            'Illuminate\Database\Database\TransactionCommitted',
+            'Illuminate\Database\Database\TransactionRolledBack',
         ], EventBusListener::class);
     }
 }
