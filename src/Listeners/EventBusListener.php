@@ -81,6 +81,38 @@ class EventBusListener
             $this->datadog->timing('airslate.queue.job', $this->meter->stop($event->job), 1, [
                 'status' => 'failed',
             ]);
+        } elseif ($event instanceof \Illuminate\Cache\Events\CacheHit) {
+            $this->datadog->increment('airslate.cache.item', 1, [
+                'status' => 'hit',
+            ]);
+        } elseif ($event instanceof \Illuminate\Cache\Events\CacheMissed) {
+            $this->datadog->increment('airslate.cache.item', 1, [
+                'status' => 'miss',
+            ]);
+        } elseif ($event instanceof \Illuminate\Cache\Events\KeyForgotten) {
+            $this->datadog->increment('airslate.cache.item', 1, [
+                'status' => 'del',
+            ]);
+        } elseif ($event instanceof \Illuminate\Cache\Events\KeyWritten) {
+            $this->datadog->increment('airslate.cache.item', 1, [
+                'status' => 'put',
+            ]);
+        } elseif ($event instanceof \Illuminate\Database\Events\QueryExecuted) {
+            $this->datadog->increment('airslate.db.query', 1, [
+                'status' => 'executed',
+            ]);
+        } elseif ($event instanceof \Illuminate\Database\Events\TransactionBeginning) {
+            $this->datadog->increment('airslate.db.transaction', 1, [
+                'status' => 'begin',
+            ]);
+        } elseif ($event instanceof \Illuminate\Database\Events\TransactionCommitted) {
+            $this->datadog->increment('airslate.db.transaction', 1, [
+                'status' => 'commit',
+            ]);
+        } elseif ($event instanceof \Illuminate\Database\Events\TransactionRolledBack) {
+            $this->datadog->increment('airslate.db.transaction', 1, [
+                'status' => 'rollback',
+            ]);
         }
     }
 

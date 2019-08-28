@@ -32,6 +32,8 @@ class Datadog extends DogStatsd
 
     private function prepareTags(?array $tags): array
     {
+        $tags = is_array($tags) ? $tags : [];
+
         return array_merge($this->tags, $tags);
     }
 }
