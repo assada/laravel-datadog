@@ -81,20 +81,20 @@ class EventBusListener
             $this->datadog->timing('airslate.queue.job', $this->meter->stop($event->job), 1, [
                 'status' => 'failed',
             ]);
-        } elseif ($event instanceof \Illuminate\Database\Events\CacheHit) {
-            $this->datadog->timing('airslate.cache.item', $this->meter->stop($event->job), 1, [
+        } elseif ($event instanceof \Illuminate\Cache\Events\CacheHit) {
+            $this->datadog->increment('airslate.cache.item', 1, [
                 'status' => 'hit',
             ]);
         } elseif ($event instanceof \Illuminate\Cache\Events\CacheMissed) {
-            $this->datadog->timing('airslate.cache.item', $this->meter->stop($event->job), 1, [
+            $this->datadog->increment('airslate.cache.item', 1, [
                 'status' => 'miss',
             ]);
         } elseif ($event instanceof \Illuminate\Cache\Events\KeyForgotten) {
-            $this->datadog->timing('airslate.cache.item', $this->meter->stop($event->job), 1, [
+            $this->datadog->increment('airslate.cache.item', 1, [
                 'status' => 'del',
             ]);
         } elseif ($event instanceof \Illuminate\Cache\Events\KeyWritten) {
-            $this->datadog->timing('airslate.cache.item', $this->meter->stop($event->job), 1, [
+            $this->datadog->increment('airslate.cache.item', 1, [
                 'status' => 'put',
             ]);
         } elseif ($event instanceof \Illuminate\Database\Events\QueryExecuted) {
@@ -102,15 +102,15 @@ class EventBusListener
                 'status' => 'executed',
             ]);
         } elseif ($event instanceof \Illuminate\Database\Events\TransactionBeginning) {
-            $this->datadog->timing('airslate.db.transaction', $this->meter->stop($event->job), 1, [
+            $this->datadog->increment('airslate.db.transaction', 1, [
                 'status' => 'begin',
             ]);
         } elseif ($event instanceof \Illuminate\Database\Events\TransactionCommitted) {
-            $this->datadog->timing('airslate.db.transaction', $this->meter->stop($event->job), 1, [
+            $this->datadog->increment('airslate.db.transaction', 1, [
                 'status' => 'commit',
             ]);
         } elseif ($event instanceof \Illuminate\Database\Events\TransactionRolledBack) {
-            $this->datadog->timing('airslate.db.transaction', $this->meter->stop($event->job), 1, [
+            $this->datadog->increment('airslate.db.transaction', 1, [
                 'status' => 'rollback',
             ]);
         }
