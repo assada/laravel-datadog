@@ -16,6 +16,10 @@ class EventServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->when(EventBusListener::class)
+                  ->needs('$namespace')
+                  ->give($this->app->get('config')->get('datadog.namespace', 'namespace'));
+
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->get(Dispatcher::class);
 
