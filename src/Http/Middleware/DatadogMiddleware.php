@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace AirSlate\Datadog\Http\Middleware;
@@ -20,9 +21,20 @@ class DatadogMiddleware
      */
     private $datadog;
 
-    public function __construct()
+    /**
+     * @var string
+     */
+    private $namespace;
+
+    /**
+     * DatadogMiddleware constructor.
+     * @param Datadog $datadog
+     * @param string $namespace
+     */
+    public function __construct(Datadog $datadog, string $namespace)
     {
-        $this->datadog = Container::getInstance()->make(Datadog::class);
+        $this->namespace = $namespace;
+        $this->datadog = $datadog;
     }
 
     /**
@@ -55,6 +67,6 @@ class DatadogMiddleware
         ];
 
         // send response time
-        $this->datadog->timing('airslate.response_time', $duration, 1, $tags);
+        $this->datadog->timing("{$this->namespace}.response_time", $duration, 1, $tags);
     }
 }
