@@ -37,7 +37,7 @@ class DatadogProvider extends ServiceProvider
         });
         $this->app->when(DatadogMiddleware::class)
                   ->needs('$namespace')
-                  ->give($config['namespace'] ?? 'namespace');
+                  ->give($config['application_namespace'] ?? 'unknown');
 
         $datadog->addTag('app', $config['application_name'] ?? 'unknown');
 
