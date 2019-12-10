@@ -39,7 +39,12 @@ class DatadogProvider extends ServiceProvider
                   ->needs('$namespace')
                   ->give($config['application_namespace'] ?? 'unknown');
 
-        $datadog->addTag('app', $config['application_name'] ?? 'unknown');
+        $datadog->addTag('app', strtolower(
+            preg_replace('/\s+/', '-', $config['application_name'] ?? 'unknown')
+        ));
+        if ($config['statsd_env'] !== null) {
+            $datadog->addTag('env', $config['statsd_env']);
+        }
 
         $this->registerRouteMatchedListener($datadog);
     }

@@ -16,17 +16,17 @@ jobs:
     # Download and cache dependencies
     - restore_cache:
         keys:
-        - v1-dependencies-{{ checksum "composer.json" }}
+        - v2-dependencies-{{ checksum "composer.json" }}
         # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+        - v2-dependencies-
 
     - run: composer config --global github-oauth.github.com 817f827a65d8a27e80ccf49c24c1482d2627de46
     - run: composer install -n --prefer-dist --ignore-platform-reqs
 
     - save_cache:
         paths:
-        - ./vendor
-        key: v1-dependencies-{{ checksum "composer.json" }}
+          - ./vendor
+        key: v2-dependencies-{{ checksum "composer.json" }}
 
     # run tests!
     - run: ./vendor/bin/phpcs
