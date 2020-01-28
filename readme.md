@@ -73,6 +73,15 @@ datadog:
       NON_LOCAL_TRAFFIC: "true"
 ```
 
+## Add Default tags
+
+```php
+    $this->app->bind('datadog.company.tag', function() {
+        return new Tag('company', 'airslate');
+    });
+    $this->app->tag('datadog.company.tag', DatadogProvider::DATADOG_TAG);
+```
+
 ## Datadog metrics
 
 ### airslate.eventbus.receive(time)

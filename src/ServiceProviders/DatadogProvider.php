@@ -6,9 +6,11 @@ namespace AirSlate\Datadog\ServiceProviders;
 use AirSlate\Datadog\Http\Middleware\DatadogMiddleware;
 use AirSlate\Datadog\Services\Datadog;
 use AirSlate\Datadog\Services\QueueJobMeter;
+use AirSlate\Datadog\Tag\Tag;
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
  * Class DatadogProvider
@@ -17,6 +19,8 @@ use Illuminate\Contracts\Container\BindingResolutionException;
  */
 class DatadogProvider extends ServiceProvider
 {
+    public const DATADOG_TAG = 'datadog.tag';
+
     /**
      * @throws BindingResolutionException
      */
@@ -24,29 +28,48 @@ class DatadogProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->configPath(), 'datadog');
 
-        $config = $this->app->get('config')->get('datadog');
+        /** @var Repository $config */
+        $config = $this->app->get('config');
 
-        $datadog = new Datadog([
-            'host' => $config['statsd_server'] ?? '172.17.0.1',
-            'port' => $config['statsd_port'] ?? 8125,
-        ]);
-
-        $this->app->instance(Datadog::class, $datadog);
-        $this->app->singleton(QueueJobMeter::class, function (): QueueJobMeter {
+        $this->app->singleton(QueueJobMeter::class, static function (): QueueJobMeter {
             return new QueueJobMeter();
         });
         $this->app->when(DatadogMiddleware::class)
                   ->needs('$namespace')
-                  ->give($config['application_namespace'] ?? 'unknown');
+                  ->give($config->get('datadog.application_namespace', 'unknown'));
 
-        $datadog->addTag('app', strtolower(
-            preg_replace('/\s+/', '-', $config['application_name'] ?? 'unknown')
-        ));
-        if ($config['statsd_env'] !== null) {
-            $datadog->addTag('env', $config['statsd_env']);
-        }
+        $this->app->instance(Datadog::class, function () use ($config) {
+            $datadog = new Datadog(
+                [
+                    'host' => $config->get('datadog.statsd_server', '172.17.0.1'),
+                    'port' => $config->get('datadog.statsd_port', 8125),
+               ]
+            );
 
-        $this->registerRouteMatchedListener($datadog);
+            $datadog->addTag('app', strtolower(
+                preg_replace(
+                    '/\s+/',
+                    '-',
+                    $config->get('datadog.application_name', 'unknown')
+                )
+            ));
+
+            if ($config->get('datadog.statsd_env') !== null) {
+                $datadog->addTag('env', $config->get('datadog.statsd_env'));
+            }
+
+            $this->registerRouteMatchedListener($datadog);
+
+            foreach ($this->app->tagged(self::DATADOG_TAG) as $tag) {
+                if(!($tag instanceof Tag)) {
+                    continue;
+                }
+
+                $datadog->addTag($tag->getKey(), $tag->getValue());
+            }
+
+            return $datadog;
+        });
     }
 
     /**
@@ -54,7 +77,7 @@ class DatadogProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->runningInConsole() && function_exists('config_path')) {
+        if (function_exists('config_path') && $this->app->runningInConsole()) {
             $this->publishes([$this->configPath() => config_path('datadog.php')], 'datadog');
         }
     }
@@ -76,7 +99,7 @@ class DatadogProvider extends ServiceProvider
      */
     protected function registerRouteMatchedListener(Datadog $datadog): void
     {
-        $this->app->make('router')->matched(function (RouteMatched $matched) use ($datadog) {
+        $this->app->make('router')->matched(static function (RouteMatched $matched) use ($datadog) {
             $datadog->addTag('url', $matched->route->uri);
         });
     }
