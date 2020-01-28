@@ -43,7 +43,7 @@ class DatadogProvider extends ServiceProvider
                 [
                     'host' => $config->get('datadog.statsd_server', '172.17.0.1'),
                     'port' => $config->get('datadog.statsd_port', 8125),
-               ]
+                ]
             );
 
             $datadog->addTag('app', strtolower(
@@ -61,7 +61,7 @@ class DatadogProvider extends ServiceProvider
             $this->registerRouteMatchedListener($datadog);
 
             foreach ($this->app->tagged(self::DATADOG_TAG) as $tag) {
-                if(!($tag instanceof Tag)) {
+                if (!($tag instanceof Tag)) {
                     continue;
                 }
 
