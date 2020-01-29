@@ -38,7 +38,7 @@ class DatadogProvider extends ServiceProvider
                   ->needs('$namespace')
                   ->give($config->get('datadog.application_namespace', 'unknown'));
 
-        $this->app->instance(Datadog::class, function () use ($config) {
+        $this->app->singleton(Datadog::class, function () use ($config) {
             $datadog = new Datadog(
                 [
                     'host' => $config->get('datadog.statsd_server', '172.17.0.1'),
