@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Tag;
 
-
 /**
  * Class Tag
  *
