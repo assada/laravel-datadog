@@ -58,8 +58,6 @@ class DatadogProvider extends ServiceProvider
                 $datadog->addTag('env', $config->get('datadog.statsd_env'));
             }
 
-            $this->registerRouteMatchedListener($datadog);
-
             foreach ($this->app->tagged(self::DATADOG_TAG) as $tag) {
                 if (!($tag instanceof Tag)) {
                     continue;
@@ -70,6 +68,8 @@ class DatadogProvider extends ServiceProvider
 
             return $datadog;
         });
+        
+        $this->registerRouteMatchedListener($this->app->make(Datadog::class));
     }
 
     /**
