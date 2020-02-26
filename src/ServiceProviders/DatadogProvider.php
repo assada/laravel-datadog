@@ -43,6 +43,7 @@ class DatadogProvider extends ServiceProvider
                 [
                     'host' => $config->get('datadog.statsd_server', '172.17.0.1'),
                     'port' => $config->get('datadog.statsd_port', 8125),
+                    'global_tags' => $config->get('datadog.global_tags', []),
                 ]
             );
 
