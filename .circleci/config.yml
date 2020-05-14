@@ -21,7 +21,7 @@ jobs:
         - v2-dependencies-
 
     - run: composer config --global github-oauth.github.com 817f827a65d8a27e80ccf49c24c1482d2627de46
-    - run: composer install -n --prefer-dist --ignore-platform-reqs
+    - run: composer install -n --prefer-dist
 
     - save_cache:
         paths:
