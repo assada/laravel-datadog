@@ -117,7 +117,8 @@ class EventBusListener
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName())
             ]);
-        } elseif ($event instanceof JobExceptionOccurred && in_array(JobExceptionOccurred::class, $this->allowEvents)) {
+        } elseif ($event instanceof JobExceptionOccurred
+            && in_array(JobExceptionOccurred::class, $this->allowEvents)) {
             $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
                 'status' => 'exceptionOccurred',
                 'queue' => $event->job->getQueue(),
@@ -151,15 +152,18 @@ class EventBusListener
             $this->datadog->increment("{$this->namespace}.db.query", 1, [
                 'status' => 'executed',
             ]);
-        } elseif ($event instanceof TransactionBeginning && in_array(TransactionBeginning::class, $this->allowEvents)) {
+        } elseif ($event instanceof TransactionBeginning
+            && in_array(TransactionBeginning::class, $this->allowEvents)) {
             $this->datadog->increment("{$this->namespace}.db.transaction", 1, [
                 'status' => 'begin',
             ]);
-        } elseif ($event instanceof TransactionCommitted && in_array(TransactionCommitted::class, $this->allowEvents)) {
+        } elseif ($event instanceof TransactionCommitted
+            && in_array(TransactionCommitted::class, $this->allowEvents)) {
             $this->datadog->increment("{$this->namespace}.db.transaction", 1, [
                 'status' => 'commit',
             ]);
-        } elseif ($event instanceof TransactionRolledBack && in_array(TransactionRolledBack::class, $this->allowEvents)) {
+        } elseif ($event instanceof TransactionRolledBack
+            && in_array(TransactionRolledBack::class, $this->allowEvents)) {
             $this->datadog->increment("{$this->namespace}.db.transaction", 1, [
                 'status' => 'rollback',
             ]);
