@@ -173,7 +173,8 @@ class EventBusListener
 
         // Custom events
         if ($event instanceof DatadogEventInterface) {
-            $this->datadog->increment("{$this->namespace}.{$event->getEventCategory()},{$event->getEventName()}", 1, $event->getTags());
+            $stats = "{$this->namespace}.{$event->getEventCategory()},{$event->getEventName()}";
+            $this->datadog->increment($stats, 1, $event->getTags());
         }
     }
 
