@@ -27,6 +27,10 @@ class EventServiceProvider extends ServiceProvider
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->get(Dispatcher::class);
 
-        $dispatcher->listen($this->app->get('config')->get('datadog.events'), EventBusListener::class);
+        $eventClasses = array_merge(
+            $this->app->get('config')->get('datadog.events.defaultEvents'),
+            $this->app->get('config')->get('datadog.events.customEvents')
+        );
+        $dispatcher->listen($eventClasses, EventBusListener::class);
     }
 }

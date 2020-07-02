@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Listeners;
 
+use AirSlate\Datadog\Events\DatadogEventInterface;
+use AirSlate\Datadog\Events\DatadogEventJobInterface;
 use AirSlate\Datadog\Services\Datadog;
 use AirSlate\Datadog\Services\QueueJobMeter;
 use AirSlate\EventBusHelper\Events\ProcessedEvent;
@@ -30,7 +32,7 @@ use Laravel\Horizon\Events\JobFailed;
  * @property Datadog $datadog
  * @property QueueJobMeter $meter
  * @property string $namespace
- * @property array $allowEvents
+ * @property array $defaultEvents
  * @property array $customEvents
  */
 class EventBusListener
@@ -53,7 +55,7 @@ class EventBusListener
     /**
      * @var array
      */
-    protected $allowEvents;
+    protected $defaultEvents;
 
     /**
      * @var array
@@ -73,7 +75,7 @@ class EventBusListener
         $this->datadog = $datadog;
         $this->meter = $meter;
         $this->namespace = $namespace;
-        $this->allowEvents = $events['defaultEvents'];
+        $this->defaultEvents = $events['defaultEvents'];
         $this->customEvents = $events['customEvents'];
     }
 
@@ -83,90 +85,95 @@ class EventBusListener
      */
     public function handle($event): void
     {
-        if ($event instanceof ProcessedEvent && in_array(ProcessedEvent::class, $this->allowEvents)) {
+        if ($event instanceof ProcessedEvent && in_array(ProcessedEvent::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.eventbus.receive", $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'processed',
             ]);
-        } elseif ($event instanceof RejectedEvent && in_array(RejectedEvent::class, $this->allowEvents)) {
+        } elseif ($event instanceof RejectedEvent && in_array(RejectedEvent::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.eventbus.receive", $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'rejected',
             ]);
-        } elseif ($event instanceof RetryEvent && in_array(RetryEvent::class, $this->allowEvents)) {
+        } elseif ($event instanceof RetryEvent && in_array(RetryEvent::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.eventbus.receive", $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
                 'status' => 'retried',
             ]);
-        } elseif ($event instanceof SendEvent && in_array(SendEvent::class, $this->allowEvents)) {
+        } elseif ($event instanceof SendEvent && in_array(SendEvent::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.eventbus.send", 1, [
                 'key' => $event->getRoutingKey(),
             ]);
-        } elseif ($event instanceof SendToQueueEvent && in_array(SendToQueueEvent::class, $this->allowEvents)) {
+        } elseif ($event instanceof SendToQueueEvent && in_array(SendToQueueEvent::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.eventbus.sendtoqueue", 1, [
                 'queue' => $event->getQueueName(),
             ]);
-        } elseif ($event instanceof JobProcessing && in_array(JobProcessing::class, $this->allowEvents)) {
+        } elseif ($event instanceof JobProcessing && in_array(JobProcessing::class, $this->defaultEvents)) {
             $this->meter->start($event->job);
-        } elseif ($event instanceof JobProcessed && in_array(JobProcessed::class, $this->allowEvents)) {
+        } elseif ($event instanceof JobProcessed && in_array(JobProcessed::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
                 'status' => 'processed',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName())
             ]);
         } elseif ($event instanceof JobExceptionOccurred
-            && in_array(JobExceptionOccurred::class, $this->allowEvents)) {
+            && in_array(JobExceptionOccurred::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
                 'status' => 'exceptionOccurred',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName()),
                 'exception' => $this->getClassShortName(get_class($event->exception))
             ]);
-        } elseif ($event instanceof JobFailed && in_array(JobFailed::class, $this->allowEvents)) {
+        } elseif ($event instanceof JobFailed && in_array(JobFailed::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
                 'status' => 'failed',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName()),
                 'exception' => $this->getClassShortName(get_class($event->exception))
             ]);
-        } elseif ($event instanceof CacheHit && in_array(CacheHit::class, $this->allowEvents)) {
+        } elseif ($event instanceof CacheHit && in_array(CacheHit::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.cache.item", 1, [
                 'status' => 'hit',
             ]);
-        } elseif ($event instanceof CacheMissed && in_array(CacheMissed::class, $this->allowEvents)) {
+        } elseif ($event instanceof CacheMissed && in_array(CacheMissed::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.cache.item", 1, [
                 'status' => 'miss',
             ]);
-        } elseif ($event instanceof KeyForgotten && in_array(KeyForgotten::class, $this->allowEvents)) {
+        } elseif ($event instanceof KeyForgotten && in_array(KeyForgotten::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.cache.item", 1, [
                 'status' => 'del',
             ]);
-        } elseif ($event instanceof KeyWritten && in_array(KeyWritten::class, $this->allowEvents)) {
+        } elseif ($event instanceof KeyWritten && in_array(KeyWritten::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.cache.item", 1, [
                 'status' => 'put',
             ]);
-        } elseif ($event instanceof QueryExecuted && in_array(QueryExecuted::class, $this->allowEvents)) {
+        } elseif ($event instanceof QueryExecuted && in_array(QueryExecuted::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.db.query", 1, [
                 'status' => 'executed',
             ]);
         } elseif ($event instanceof TransactionBeginning
-            && in_array(TransactionBeginning::class, $this->allowEvents)) {
+            && in_array(TransactionBeginning::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.db.transaction", 1, [
                 'status' => 'begin',
             ]);
         } elseif ($event instanceof TransactionCommitted
-            && in_array(TransactionCommitted::class, $this->allowEvents)) {
+            && in_array(TransactionCommitted::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.db.transaction", 1, [
                 'status' => 'commit',
             ]);
         } elseif ($event instanceof TransactionRolledBack
-            && in_array(TransactionRolledBack::class, $this->allowEvents)) {
+            && in_array(TransactionRolledBack::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.db.transaction", 1, [
                 'status' => 'rollback',
             ]);
+        }
+
+        // Custom events
+        if ($event instanceof DatadogEventInterface) {
+            $this->datadog->increment("{$this->namespace}.{$event->getEventCategory()},{$event->getEventName()}", 1, $event->getTags());
         }
     }
 
