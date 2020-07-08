@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Listeners;
 
+use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Services\Datadog;
 use AirSlate\Datadog\Services\QueueJobMeter;
 
@@ -24,6 +25,11 @@ class EventBusListener
     protected $meter;
 
     /**
+     * @var DatabaseQueryCounter
+     */
+    protected $queryCounter;
+
+    /**
      * @var string
      */
     protected $namespace;
@@ -33,13 +39,19 @@ class EventBusListener
      *
      * @param Datadog $datadog
      * @param QueueJobMeter $meter
+     * @param DatabaseQueryCounter $queryCounter
      * @param string $namespace
      */
-    public function __construct(Datadog $datadog, QueueJobMeter $meter, string $namespace)
-    {
+    public function __construct(
+        string $namespace,
+        Datadog $datadog,
+        QueueJobMeter $meter,
+        DatabaseQueryCounter $queryCounter
+    ) {
+        $this->namespace = $namespace;
         $this->datadog = $datadog;
         $this->meter = $meter;
-        $this->namespace = $namespace;
+        $this->queryCounter = $queryCounter;
     }
 
     /**
@@ -76,26 +88,33 @@ class EventBusListener
             ]);
         } elseif ($event instanceof \Illuminate\Queue\Events\JobProcessing) {
             $this->meter->start($event->job);
+            $this->queryCounter->flush();
         } elseif ($event instanceof \Illuminate\Queue\Events\JobProcessed) {
-            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
+            $tags = [
                 'status' => 'processed',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName())
-            ]);
+            ];
+            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
+            $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
         } elseif ($event instanceof \Illuminate\Queue\Events\JobExceptionOccurred) {
-            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
+            $tags = [
                 'status' => 'exceptionOccurred',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName()),
                 'exception' => $this->getClassShortName(get_class($event->exception))
-            ]);
+            ];
+            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
+            $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
         } elseif ($event instanceof \Illuminate\Queue\Events\JobFailed) {
-            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
+            $tags = [
                 'status' => 'failed',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName()),
                 'exception' => $this->getClassShortName(get_class($event->exception))
-            ]);
+            ];
+            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
+            $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
         } elseif ($event instanceof \Illuminate\Cache\Events\CacheHit) {
             $this->datadog->increment("{$this->namespace}.cache.item", 1, [
                 'status' => 'hit',
@@ -113,6 +132,7 @@ class EventBusListener
                 'status' => 'put',
             ]);
         } elseif ($event instanceof \Illuminate\Database\Events\QueryExecuted) {
+            $this->queryCounter->increment();
             $this->datadog->increment("{$this->namespace}.db.query", 1, [
                 'status' => 'executed',
             ]);

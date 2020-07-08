@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Http\Middleware;
 
-use Illuminate\Container\Container;
+use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Services\Datadog;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,24 +17,32 @@ use Symfony\Component\HttpFoundation\Response;
 class DatadogMiddleware
 {
     /**
-     * @var Datadog
-     */
-    private $datadog;
-
-    /**
      * @var string
      */
     private $namespace;
 
     /**
-     * DatadogMiddleware constructor.
-     * @param Datadog $datadog
-     * @param string $namespace
+     * @var Datadog
      */
-    public function __construct(Datadog $datadog, string $namespace)
+    private $datadog;
+
+    /**
+     * @var DatabaseQueryCounter
+     */
+    private $queryCounter;
+
+    /**
+     * DatadogMiddleware constructor.
+     *
+     * @param string $namespace
+     * @param Datadog $datadog
+     * @param DatabaseQueryCounter $queryCounter
+     */
+    public function __construct(string $namespace, Datadog $datadog, DatabaseQueryCounter $queryCounter)
     {
         $this->namespace = $namespace;
         $this->datadog = $datadog;
+        $this->queryCounter = $queryCounter;
     }
 
     /**
@@ -45,20 +53,19 @@ class DatadogMiddleware
      */
     public function handle(Request $request, $next)
     {
-        $startTimer = microtime(true);
+        $start = \defined('LARAVEL_START') ? floatval(LARAVEL_START) : microtime(true);
         $response = $next($request);
-        $this->sendMetrics($request, $response, $startTimer);
+        $this->sendMetrics($request, $response, $start);
         return $response;
     }
 
     /**
      * @param Request $request
      * @param Response $response
-     * @param float|null $startTimer
+     * @param float $start
      */
-    private function sendMetrics(Request $request, Response $response, float $startTimer = null): void
+    private function sendMetrics(Request $request, Response $response, float $start): void
     {
-        $start = \defined('LARAVEL_START') ? LARAVEL_START : $startTimer;
         $duration = microtime(true) - $start;
 
         $tags = [
@@ -68,5 +75,12 @@ class DatadogMiddleware
 
         // send response time
         $this->datadog->timing("{$this->namespace}.response_time", $duration, 1, $tags);
+
+        // send memory_get_peak_usage
+        $this->datadog->gauge("{$this->namespace}.memory_peak_usage", memory_get_peak_usage(false), 1, $tags);
+        $this->datadog->gauge("{$this->namespace}.memory_peak_usage_real", memory_get_peak_usage(true), 1, $tags);
+
+        // send query count
+        $this->datadog->gauge("{$this->namespace}.db.queries", $this->queryCounter->getCount(), 1, $tags);
     }
 }
