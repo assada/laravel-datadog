@@ -69,8 +69,6 @@ class DatadogProvider extends ServiceProvider
 
             return $datadog;
         });
-        
-        $this->registerRouteMatchedListener($this->app->make(Datadog::class));
     }
 
     /**
@@ -78,6 +76,8 @@ class DatadogProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerRouteMatchedListener($this->app->make(Datadog::class));
+
         if (function_exists('config_path') && $this->app->runningInConsole()) {
             $this->publishes([$this->configPath() => config_path('datadog.php')], 'datadog');
         }
