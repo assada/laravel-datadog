@@ -82,7 +82,7 @@ datadog:
     $this->app->tag('datadog.company.tag', DatadogProvider::DATADOG_TAG);
 ```
 
-## Datadog metrics
+## Statsd metrics
 
 ### airslate.eventbus.receive(time)
 
@@ -100,4 +100,37 @@ queue - queue name
 
 ### airslate.queue.job(time)
 
+app - application name
 status - processing status(processed, exceptionOccurred, failed)
+queue - queue name
+task - short class name
+exception - short class name for statuses exceptionOccurred and failed
+
+### airslate.queue.db.queries(time)
+
+app - application name
+status - processing status(processed, exceptionOccurred, failed)
+queue - queue name
+task - short class name
+exception - short class name for statuses exceptionOccurred and failed
+
+### airslate.response_time(float)
+
+app - application name
+url - laravel route uri
+method - http request method
+code - http response code
+
+### airslate.memory_peak_usage(int)
+
+app - application name
+url - laravel route uri
+method - http request method
+code - http response code
+
+### airslate.memory_peak_usage_real(int)
+
+app - application name
+url - laravel route uri
+method - http request method
+code - http response code

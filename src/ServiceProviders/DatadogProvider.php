@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Http\Middleware\DatadogMiddleware;
+use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Services\Datadog;
 use AirSlate\Datadog\Services\QueueJobMeter;
 use AirSlate\Datadog\Tag\Tag;
@@ -34,6 +35,11 @@ class DatadogProvider extends ServiceProvider
         $this->app->singleton(QueueJobMeter::class, static function (): QueueJobMeter {
             return new QueueJobMeter();
         });
+
+        $this->app->singleton(DatabaseQueryCounter::class, static function (): DatabaseQueryCounter {
+            return new DatabaseQueryCounter();
+        });
+
         $this->app->when(DatadogMiddleware::class)
                   ->needs('$namespace')
                   ->give($config->get('datadog.application_namespace', 'unknown'));
