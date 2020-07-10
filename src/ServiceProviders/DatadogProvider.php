@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Http\Middleware\DatadogMiddleware;
+use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Services\Datadog;
 use AirSlate\Datadog\Services\QueueJobMeter;
 use AirSlate\Datadog\Tag\Tag;
@@ -34,6 +35,11 @@ class DatadogProvider extends ServiceProvider
         $this->app->singleton(QueueJobMeter::class, static function (): QueueJobMeter {
             return new QueueJobMeter();
         });
+
+        $this->app->singleton(DatabaseQueryCounter::class, static function (): DatabaseQueryCounter {
+            return new DatabaseQueryCounter();
+        });
+
         $this->app->when(DatadogMiddleware::class)
                   ->needs('$namespace')
                   ->give($config->get('datadog.application_namespace', 'unknown'));
@@ -43,6 +49,7 @@ class DatadogProvider extends ServiceProvider
                 [
                     'host' => $config->get('datadog.statsd_server', '172.17.0.1'),
                     'port' => $config->get('datadog.statsd_port', 8125),
+                    'global_tags' => $config->get('datadog.global_tags', []),
                 ]
             );
 
@@ -68,8 +75,6 @@ class DatadogProvider extends ServiceProvider
 
             return $datadog;
         });
-        
-        $this->registerRouteMatchedListener($this->app->make(Datadog::class));
     }
 
     /**
@@ -77,6 +82,8 @@ class DatadogProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerRouteMatchedListener($this->app->make(Datadog::class));
+
         if (function_exists('config_path') && $this->app->runningInConsole()) {
             $this->publishes([$this->configPath() => config_path('datadog.php')], 'datadog');
         }

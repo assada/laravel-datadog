@@ -38,4 +38,5 @@ return [
             //Your custom events FQN
         ]
     ]
+    'global_tags' => [],
 ];

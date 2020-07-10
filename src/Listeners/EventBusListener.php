@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Listeners;
 
+use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Events\DatadogEventInterface;
 use AirSlate\Datadog\Events\DatadogEventJobInterface;
 use AirSlate\Datadog\Services\Datadog;
@@ -34,6 +35,7 @@ use Laravel\Horizon\Events\JobFailed;
  * @property string $namespace
  * @property array $defaultEvents
  * @property array $customEvents
+ * @property DatabaseQueryCounter $queryCounter
  */
 class EventBusListener
 {
@@ -46,6 +48,11 @@ class EventBusListener
      * @var QueueJobMeter
      */
     protected $meter;
+
+    /**
+     * @var DatabaseQueryCounter
+     */
+    protected $queryCounter;
 
     /**
      * @var string
@@ -67,16 +74,24 @@ class EventBusListener
      *
      * @param Datadog $datadog
      * @param QueueJobMeter $meter
+     * @param DatabaseQueryCounter $queryCounter
      * @param string $namespace
      * @param array $events
      */
-    public function __construct(Datadog $datadog, QueueJobMeter $meter, string $namespace, array $events)
-    {
+    public function __construct(
+        string $namespace,
+        Datadog $datadog,
+        QueueJobMeter $meter,
+        DatabaseQueryCounter $queryCounter,
+        array $events
+    ) {
+        $this->namespace = $namespace;
         $this->datadog = $datadog;
         $this->meter = $meter;
         $this->namespace = $namespace;
         $this->defaultEvents = $events['defaultEvents'];
         $this->customEvents = $events['customEvents'];
+        $this->queryCounter = $queryCounter;
     }
 
     /**
@@ -113,27 +128,35 @@ class EventBusListener
             ]);
         } elseif ($event instanceof JobProcessing && in_array(JobProcessing::class, $this->defaultEvents)) {
             $this->meter->start($event->job);
+            $this->queryCounter->flush();
         } elseif ($event instanceof JobProcessed && in_array(JobProcessed::class, $this->defaultEvents)) {
-            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
+            $tags = [
                 'status' => 'processed',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName())
+            ];
+            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
+            $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
             ]);
         } elseif ($event instanceof JobExceptionOccurred
             && in_array(JobExceptionOccurred::class, $this->defaultEvents)) {
-            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
+            $tags = [
                 'status' => 'exceptionOccurred',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName()),
                 'exception' => $this->getClassShortName(get_class($event->exception))
-            ]);
+            ];
+            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
+            $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
         } elseif ($event instanceof JobFailed && in_array(JobFailed::class, $this->defaultEvents)) {
-            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, [
+            $tags = [
                 'status' => 'failed',
                 'queue' => $event->job->getQueue(),
                 'task' => $this->getClassShortName($event->job->resolveName()),
                 'exception' => $this->getClassShortName(get_class($event->exception))
-            ]);
+            ];
+            $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
+            $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
         } elseif ($event instanceof CacheHit && in_array(CacheHit::class, $this->defaultEvents)) {
             $this->datadog->increment("{$this->namespace}.cache.item", 1, [
                 'status' => 'hit',
@@ -151,6 +174,7 @@ class EventBusListener
                 'status' => 'put',
             ]);
         } elseif ($event instanceof QueryExecuted && in_array(QueryExecuted::class, $this->defaultEvents)) {
+            $this->queryCounter->increment();
             $this->datadog->increment("{$this->namespace}.db.query", 1, [
                 'status' => 'executed',
             ]);
