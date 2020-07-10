@@ -82,6 +82,16 @@ datadog:
     $this->app->tag('datadog.company.tag', DatadogProvider::DATADOG_TAG);
 ```
 
+## Turn on\off default events
+
+Remove FQN event name class from config `datadog.php` to switch off event, or add it back to switch on.
+
+## Add custom events
+
+You can add your own events which name and custom tags. Just do 2 steps.
+1. Create simple event and implement it of `AirSlate\Datadog\Events\DatadogEventInterface`.
+2. Add your FQN of custom event to config datadog.php in `customEvents` array.
+
 ## Statsd metrics
 
 ### airslate.eventbus.receive(time)
