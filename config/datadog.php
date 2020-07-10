@@ -37,6 +37,6 @@ return [
         'customEvents' => [
             //Your custom events FQN
         ]
-    ]
+    ],
     'global_tags' => [],
 ];

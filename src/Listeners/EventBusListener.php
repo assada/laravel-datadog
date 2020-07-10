@@ -137,7 +137,6 @@ class EventBusListener
             ];
             $this->datadog->timing("{$this->namespace}.queue.job", $this->meter->stop($event->job), 1, $tags);
             $this->datadog->gauge("{$this->namespace}.queue.db.queries", $this->queryCounter->getCount(), 1, $tags);
-            ]);
         } elseif ($event instanceof JobExceptionOccurred
             && in_array(JobExceptionOccurred::class, $this->defaultEvents)) {
             $tags = [
@@ -197,7 +196,7 @@ class EventBusListener
 
         // Custom events
         if ($event instanceof DatadogEventInterface) {
-            $stats = "{$this->namespace}.{$event->getEventCategory()},{$event->getEventName()}";
+            $stats = "{$this->namespace}.{$event->getEventCategory()}.{$event->getEventName()}";
             $this->datadog->increment($stats, 1, $event->getTags());
         }
     }
