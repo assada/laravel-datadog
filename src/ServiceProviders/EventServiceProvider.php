@@ -17,30 +17,20 @@ class EventServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->when(EventBusListener::class)
-                  ->needs('$namespace')
-                  ->give($this->app->get('config')->get('datadog.application_namespace', 'unknown'));
+            ->needs('$namespace')
+            ->give($this->app->get('config')->get('datadog.application_namespace', 'unknown'));
+
+        $this->app->when(EventBusListener::class)
+            ->needs('$events')
+            ->give($this->app->get('config')->get('datadog.events'));
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->get(Dispatcher::class);
 
-        $dispatcher->listen([
-            'AirSlate\EventBusHelper\Events\ProcessedEvent',
-            'AirSlate\EventBusHelper\Events\RejectedEvent',
-            'AirSlate\EventBusHelper\Events\RetriedEvent',
-            'AirSlate\EventBusHelper\Events\SendEvent',
-            'AirSlate\EventBusHelper\Events\SendToQueueEvent',
-            'Illuminate\Queue\Events\JobProcessing',
-            'Illuminate\Queue\Events\JobProcessed',
-            'Illuminate\Queue\Events\JobExceptionOccurred',
-            'Illuminate\Queue\Events\JobFailed',
-            'Illuminate\Cache\Events\CacheHit',
-            'Illuminate\Cache\Events\CacheMissed',
-            'Illuminate\Cache\Events\KeyForgotten',
-            'Illuminate\Cache\Events\KeyWritten',
-            'Illuminate\Database\Events\QueryExecuted',
-            'Illuminate\Database\Events\TransactionBeginning',
-            'Illuminate\Database\Events\TransactionCommitted',
-            'Illuminate\Database\Events\TransactionRolledBack',
-        ], EventBusListener::class);
+        $eventClasses = array_merge(
+            $this->app->get('config')->get('datadog.events.defaultEvents'),
+            $this->app->get('config')->get('datadog.events.customEvents')
+        );
+        $dispatcher->listen($eventClasses, EventBusListener::class);
     }
 }
