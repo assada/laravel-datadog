@@ -24,7 +24,7 @@ use Illuminate\Database\Events\TransactionRolledBack;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
-use Laravel\Horizon\Events\JobFailed;
+use Illuminate\Queue\Events\JobFailed;
 
 /**
  * Class EventBusListener
