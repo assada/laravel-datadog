@@ -13,9 +13,9 @@
     "require": {
         "php": ">=7.1",
         "datadog/php-datadogstatsd": "1.4.*",
-        "illuminate/routing": "^5.6 || ^6.0",
-        "illuminate/support": "^5.6 || ^6.0",
-        "illuminate/events": "^5.6 || ^6.0"
+        "illuminate/routing": "^5.6 || ^6.0 || ^7.0",
+        "illuminate/support": "^5.6 || ^6.0 || ^7.0",
+        "illuminate/events": "^5.6 || ^6.0 || ^7.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
