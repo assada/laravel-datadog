@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Listeners;
 
+use AirSlate\Datadog\Events\DatadogEventExtendedInterface;
 use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Events\DatadogEventInterface;
 use AirSlate\Datadog\Events\DatadogEventJobInterface;
@@ -25,6 +26,7 @@ use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobFailed;
+use DomainException;
 
 /**
  * Class EventBusListener
@@ -196,8 +198,37 @@ class EventBusListener
 
         // Custom events
         if ($event instanceof DatadogEventInterface) {
-            $stats = "{$this->namespace}.{$event->getEventCategory()}.{$event->getEventName()}";
-            $this->datadog->increment($stats, 1, $event->getTags());
+            $this->sendCustomMetric($event);
+        }
+    }
+
+    private function sendCustomMetric(DatadogEventInterface $event)
+    {
+        $stats = "{$this->namespace}.{$event->getEventCategory()}.{$event->getEventName()}";
+
+        if ($event instanceof DatadogEventExtendedInterface) {
+            switch ($event->getMetricType()) {
+                case DatadogEventExtendedInterface::METRIC_TYPE_INCREMENT:
+                    $this->datadog->increment($stats, 1, $event->getTags(), $event->getValue());
+                    break;
+                case DatadogEventExtendedInterface::METRIC_TYPE_DECREMENT:
+                    $this->datadog->decrement($stats, 1, $event->getTags(), $event->getValue());
+                    break;
+                case DatadogEventExtendedInterface::METRIC_TYPE_HISTOGRAM:
+                    $this->datadog->histogram($stats, $event->getValue(), 1, $event->getTags());
+                    break;
+                case DatadogEventExtendedInterface::METRIC_TYPE_GAUGE:
+                    $this->datadog->gauge($stats, $event->getValue(), 1, $event->getTags());
+                    break;
+                case DatadogEventExtendedInterface::METRIC_TYPE_TIMING:
+                    $this->datadog->timing($stats, $event->getValue(), 1, $event->getTags());
+                    break;
+                default:
+                    throw new DomainException('metric' . $event->getMetricType() . ' is not found in ' .
+                        DatadogEventExtendedInterface::class . ' allowed metrics');
+            }
+        } else {
+            $this->datadog->increment($stats, 1, $event->getTags(), 1);
         }
     }
 
