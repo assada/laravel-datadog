@@ -133,13 +133,13 @@ class EventBusListener
     }
 
     /**
-     * @param DatadogEventInterface $event
+     * @param mixed $event
      *
      * @return void
      *
      * @throws ReflectionException
      */
-    private function sendMetric(DatadogEventInterface $event): void
+    private function sendMetric($event): void
     {
         if ($event instanceof ProcessedEvent && in_array(ProcessedEvent::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.eventbus.receive", $this->getDuration($event), 1, [
