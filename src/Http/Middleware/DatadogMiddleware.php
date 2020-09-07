@@ -7,7 +7,9 @@ namespace AirSlate\Datadog\Http\Middleware;
 use AirSlate\Datadog\Services\DatabaseQueryCounter;
 use AirSlate\Datadog\Services\Datadog;
 use Illuminate\Http\Request;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Class DatadogMiddleware
@@ -32,17 +34,28 @@ class DatadogMiddleware
     private $queryCounter;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * DatadogMiddleware constructor.
      *
      * @param string $namespace
      * @param Datadog $datadog
      * @param DatabaseQueryCounter $queryCounter
+     * @param LoggerInterface $logger
      */
-    public function __construct(string $namespace, Datadog $datadog, DatabaseQueryCounter $queryCounter)
-    {
+    public function __construct(
+        string $namespace,
+        Datadog $datadog,
+        DatabaseQueryCounter $queryCounter,
+        LoggerInterface $logger
+    ) {
         $this->namespace = $namespace;
         $this->datadog = $datadog;
         $this->queryCounter = $queryCounter;
+        $this->logger = $logger;
     }
 
     /**
@@ -55,7 +68,15 @@ class DatadogMiddleware
     {
         $start = \defined('LARAVEL_START') ? floatval(LARAVEL_START) : microtime(true);
         $response = $next($request);
-        $this->sendMetrics($request, $response, $start);
+
+        try {
+            $this->sendMetrics($request, $response, $start);
+        } catch (Throwable $exception) {
+            $this->logger->error('Cannot send metrics.', [
+                'excpetion' => $exception,
+            ]);
+        }
+
         return $response;
     }
 
