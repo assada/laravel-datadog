@@ -14,6 +14,7 @@ use AirSlate\EventBusHelper\Events\SendToQueueEvent;
 use AirSlate\EventBusHelper\Events\SendEvent;
 use AirSlate\EventBusHelper\Events\RetryEvent;
 use AirSlate\EventBusHelper\Events\RejectedEvent;
+use Exception;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Cache\Events\KeyForgotten;
@@ -27,6 +28,9 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobFailed;
 use DomainException;
+use Psr\Log\LoggerInterface;
+use ReflectionException;
+use Throwable;
 
 /**
  * Class EventBusListener
@@ -38,6 +42,7 @@ use DomainException;
  * @property array $defaultEvents
  * @property array $customEvents
  * @property DatabaseQueryCounter $queryCounter
+ * @property LoggerInterface $logger
  */
 class EventBusListener
 {
@@ -55,6 +60,11 @@ class EventBusListener
      * @var DatabaseQueryCounter
      */
     protected $queryCounter;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     /**
      * @var string
@@ -77,6 +87,7 @@ class EventBusListener
      * @param Datadog $datadog
      * @param QueueJobMeter $meter
      * @param DatabaseQueryCounter $queryCounter
+     * @param LoggerInterface $logger
      * @param string $namespace
      * @param array $events
      */
@@ -85,6 +96,7 @@ class EventBusListener
         Datadog $datadog,
         QueueJobMeter $meter,
         DatabaseQueryCounter $queryCounter,
+        LoggerInterface $logger,
         array $events
     ) {
         $this->namespace = $namespace;
@@ -94,13 +106,40 @@ class EventBusListener
         $this->defaultEvents = $events['defaultEvents'];
         $this->customEvents = $events['customEvents'];
         $this->queryCounter = $queryCounter;
+        $this->logger = $logger;
     }
 
     /**
      * @param mixed $event
-     * @throws \Exception
+     *
+     * @return void
+     *
+     * @throws Exception
      */
     public function handle($event): void
+    {
+        try {
+            $this->sendMetric($event);
+
+            // Custom events
+            if ($event instanceof DatadogEventInterface) {
+                $this->sendCustomMetric($event);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('Cannot send metrics.', [
+                'excpetion' => $exception,
+            ]);
+        }
+    }
+
+    /**
+     * @param mixed $event
+     *
+     * @return void
+     *
+     * @throws ReflectionException
+     */
+    private function sendMetric($event): void
     {
         if ($event instanceof ProcessedEvent && in_array(ProcessedEvent::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.eventbus.receive", $this->getDuration($event), 1, [
@@ -195,14 +234,14 @@ class EventBusListener
                 'status' => 'rollback',
             ]);
         }
-
-        // Custom events
-        if ($event instanceof DatadogEventInterface) {
-            $this->sendCustomMetric($event);
-        }
     }
 
-    private function sendCustomMetric(DatadogEventInterface $event)
+    /**
+     * @param DatadogEventInterface $event
+     *
+     * @return void
+     */
+    private function sendCustomMetric(DatadogEventInterface $event): void
     {
         $stats = "{$this->namespace}.{$event->getEventCategory()}.{$event->getEventName()}";
 
@@ -235,7 +274,7 @@ class EventBusListener
     /**
      * @param string $alias
      * @return string
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function getClassShortName(string $alias): string
     {
