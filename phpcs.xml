@@ -4,8 +4,9 @@
     <description>AirSlate Coding Standards</description>
 
     <!-- Use PSR-2 as a base -->
-    <rule ref="PSR2"/>
+    <rule ref="PSR12"/>
 
     <!-- We can extend it for everything we need -->
     <file>./src</file>
+    <exclude-pattern>/Listeners/*\.(php)$</exclude-pattern>
 </ruleset>

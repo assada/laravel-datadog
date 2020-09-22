@@ -13,25 +13,31 @@
     "require": {
         "php": ">=7.1",
         "datadog/php-datadogstatsd": "1.4.*",
-        "illuminate/routing": "^5.6 || ^6.0 || ^7.0",
-        "illuminate/support": "^5.6 || ^6.0 || ^7.0",
-        "illuminate/events": "^5.6 || ^6.0 || ^7.0"
+        "Illuminate/cache": "^5.6 || ^6.0 || ^7.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "^3.2",
-        "vimeo/psalm": "^3.0"
+        "vimeo/psalm": "^3.0",
+        "phpunit/phpunit": "^9.3",
+        "laravel/framework": "^5.6 || ^6.0 || ^7.0",
+        "phpstan/phpstan": "^0.12.50"
     },
     "autoload": {
         "psr-4": {
             "AirSlate\\Datadog\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "AirSlate\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
                 "AirSlate\\Datadog\\ServiceProviders\\DatadogProvider",
-                "AirSlate\\Datadog\\ServiceProviders\\EventServiceProvider"
+                "AirSlate\\Datadog\\ServiceProviders\\ComponentsProvider"
             ]
         }
     },

@@ -102,7 +102,7 @@ class EventBusListener
      */
     public function handle($event): void
     {
-        if ($event instanceof ProcessedEvent && in_array(ProcessedEvent::class, $this->defaultEvents)) {
+        /*if ($event instanceof ProcessedEvent && in_array(ProcessedEvent::class, $this->defaultEvents)) {
             $this->datadog->timing("{$this->namespace}.eventbus.receive", $this->getDuration($event), 1, [
                 'key' => $event->getRoutingKey(),
                 'queue' => $event->getQueueName(),
@@ -128,7 +128,7 @@ class EventBusListener
             $this->datadog->increment("{$this->namespace}.eventbus.sendtoqueue", 1, [
                 'queue' => $event->getQueueName(),
             ]);
-        } elseif ($event instanceof JobProcessing && in_array(JobProcessing::class, $this->defaultEvents)) {
+        } else*/if ($event instanceof JobProcessing && in_array(JobProcessing::class, $this->defaultEvents)) {
             $this->meter->start($event->job);
             $this->queryCounter->flush();
         } elseif ($event instanceof JobProcessed && in_array(JobProcessed::class, $this->defaultEvents)) {
