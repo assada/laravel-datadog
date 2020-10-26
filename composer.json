@@ -12,16 +12,14 @@
     ],
     "require": {
         "php": ">=7.1",
-        "datadog/php-datadogstatsd": "1.4.*",
-        "Illuminate/cache": "^5.6 || ^6.0 || ^7.0"
+        "datadog/php-datadogstatsd": "1.4.*"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "^3.2",
-        "vimeo/psalm": "^3.0",
-        "phpunit/phpunit": "^9.3",
-        "laravel/framework": "^5.6 || ^6.0 || ^7.0",
-        "phpstan/phpstan": "^0.12.50"
+        "phpstan/phpstan": "^0.12.50",
+        "phpunit/phpunit": "^7.0",
+        "laravel/framework": "^5.6",
+        "vimeo/psalm": "^3.0"
     },
     "autoload": {
         "psr-4": {

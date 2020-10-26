@@ -49,7 +49,7 @@ class DatadogStub extends Datadog
      * @param float $sampleRate
      * @param null $tags
      */
-    public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
+    public function timing($stat, $time, $sampleRate = 1.0, $tags = null): void
     {
         $this->setStat(
             DatadogEventExtendedInterface::METRIC_TYPE_TIMING,

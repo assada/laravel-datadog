@@ -39,16 +39,6 @@ If Laravel package auto-discovery is disabled, add service providers manually.
 php artisan vendor:publish --tag=datadog
 ```
 
-### Add middleware. 
-Datadog middleware must be last in your middleware list.
-
-```php
-$middleware = [
-    // ...
-    \AirSlate\Datadog\Http\Middleware\DatadogMiddlware::class,
-];
-```
-
 ## For local, stand-alone service development
 Add Datadog keys to docker/config/env.ctmpl
 ```
@@ -94,19 +84,6 @@ You can add your own events which name and custom tags. Just do 2 steps.
 
 ## Statsd metrics
 
-### airslate.eventbus.receive(time)
-
-key - key name
-queue - queue name
-status - processing status(processed, rejected, retried)
-
-### airslate.eventbus.send(int)
-
-key - key name
-
-### airslate.eventbus.sendtoqueue
-
-queue - queue name
 
 ### airslate.queue.job(time)
 

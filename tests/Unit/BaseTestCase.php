@@ -22,7 +22,9 @@ class BaseTestCase extends TestCase
 
     public function createApplication()
     {
-        define('LARAVEL_START', 0);
+        if (!defined('LARAVEL_START')) {
+            define('LARAVEL_START', 0);
+        }
 
         $application = new Application(
             dirname(__DIR__, 2)
