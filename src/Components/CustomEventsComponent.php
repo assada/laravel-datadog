@@ -12,7 +12,8 @@ class CustomEventsComponent extends ComponentAbstract
 {
     public function register(): void
     {
-        $this->listen('*', function ($eventName, $data) {
+        /** @var string $eventName */
+        $this->listen('*', function (string $eventName, array $data) {
             $event = $data[0];
 
             if (!$event instanceof DatadogEventInterface) {
@@ -30,10 +31,10 @@ class CustomEventsComponent extends ComponentAbstract
     }
 
     /**
-     * @param $event
+     * @param DatadogEventExtendedInterface $event
      * @param string $stats
      */
-    private function sendExtendedMetric($event, string $stats): void
+    private function sendExtendedMetric(DatadogEventExtendedInterface $event, string $stats): void
     {
         switch ($event->getMetricType()) {
             case DatadogEventExtendedInterface::METRIC_TYPE_INCREMENT:

@@ -6,8 +6,6 @@ namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Components\ComponentInterface;
 use AirSlate\Datadog\Services\CounterManager;
-use AirSlate\Datadog\Services\Datadog;
-use AirSlate\Datadog\Services\StatisticManager;
 use AirSlate\Datadog\Services\TimerManager;
 use Illuminate\Config\Repository;
 use Illuminate\Support\ServiceProvider;
@@ -22,7 +20,7 @@ class ComponentsProvider extends ServiceProvider
         );
     }
 
-    public function boot()
+    public function boot(): void
     {
         /** @var Repository $config */
         $this->app->singleton(TimerManager::class);

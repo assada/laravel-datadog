@@ -8,24 +8,11 @@ use AirSlate\Datadog\Exceptions\IntervalException;
 
 class Timer
 {
-    /** @var string */
-    private $name;
+    /** @var float */
+    private $start = 0;
 
     /** @var float */
-    private $start;
-
-    /** @var float */
-    private $stop;
-
-    /**
-     * TimeStatistic constructor.
-     *
-     * @param string $name
-     */
-    public function __construct(string $name = '')
-    {
-        $this->name = $name;
-    }
+    private $stop = 0;
 
     public function start(): void
     {

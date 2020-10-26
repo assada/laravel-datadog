@@ -43,9 +43,9 @@ abstract class ComponentAbstract implements ComponentInterface
     abstract public function register(): void;
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return $this->namespace;
     }
@@ -60,7 +60,7 @@ abstract class ComponentAbstract implements ComponentInterface
         return $this->classShortener->shorten($className);
     }
 
-    protected function listen(string $event, \Closure $callback)
+    protected function listen(string $event, \Closure $callback): void
     {
         $this->dispatcher->listen($event, $callback);
     }

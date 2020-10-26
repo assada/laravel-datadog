@@ -9,6 +9,7 @@ use AirSlate\Datadog\Models\Counter;
 
 class CounterManager
 {
+    /** @var array  */
     private $counters = [];
 
     public function startCounter(string $name): Counter
@@ -33,7 +34,7 @@ class CounterManager
      *
      * @throws CounterException
      */
-    public function getValue(string $name)
+    public function getValue(string $name): int
     {
         return $this->getCounter($name)->getValue();
     }
@@ -54,7 +55,7 @@ class CounterManager
         return $this->counters[$name];
     }
 
-    public function clearCounter(string $name)
+    public function clearCounter(string $name): void
     {
         unset($this->counters[$name]);
     }

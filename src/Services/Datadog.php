@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Config;
  */
 class Datadog extends DogStatsd
 {
+    /** @var array<string, string> */
     private $tags = [];
 
     /**
@@ -28,7 +29,7 @@ class Datadog extends DogStatsd
     /**
      * {@inheritdoc}
      */
-    public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
+    public function timing($stat, $time, $sampleRate = 1.0, $tags = null): void
     {
         parent::timing($stat, $time, $sampleRate, $tags);
 
@@ -37,7 +38,7 @@ class Datadog extends DogStatsd
         }
     }
 
-    public function addTag(string $key, $value): void
+    public function addTag(string $key, string $value): void
     {
         if (!empty($key) && !empty($value)) {
             $this->tags[$key] = $value;

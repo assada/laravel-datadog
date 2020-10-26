@@ -3,6 +3,6 @@
 set -e
 
 ./vendor/bin/phpcs
-./vendor/bin/psalm --show-info=false --threads=2
+./vendor/bin/psalm --show-info=true --threads=2
 ./vendor/bin/phpstan a --no-progress --memory-limit=4G
 ./vendor/bin/phpunit tests

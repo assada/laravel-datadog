@@ -6,10 +6,6 @@ namespace AirSlate\Datadog\Components;
 
 use Illuminate\Database\Events\QueryExecuted;
 
-/**
- * Class QueryExecutedComponent
- * @package AirSlate\Datadog\Components
- */
 class QueryExecutedComponent extends ComponentAbstract
 {
     public function register(): void
