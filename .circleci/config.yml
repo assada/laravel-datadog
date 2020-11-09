@@ -31,6 +31,6 @@ jobs:
     # run tests!
     - run: ./vendor/bin/phpcs
     - run: ./vendor/bin/psalm --show-info=false
-    - run: ./vendor/bin/phpstan a --no-progress --memory-limit=4G
+    - run: ./vendor/bin/phpstan a --no-progress --memory-limit=4G ./src
     - run: mkdir ./tests/app/bootstrap && mkdir ./tests/app/bootstrap/cache
     - run: ./vendor/bin/phpunit tests
