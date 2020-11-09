@@ -32,11 +32,36 @@ composer require airslate/laravel-datadog
 **This package provide auto discovery for service provider** 
 
 If Laravel package auto-discovery is disabled, add service providers manually.
+There are two service providers you must add:
+```
+\AirSlate\Datadog\ServiceProviders\DatadogProvider::class
+\AirSlate\Datadog\ServiceProviders\ComponentsProvider::class
+```
 
 ### Publish client configuration:
 
 ```bash
 php artisan vendor:publish --tag=datadog
+```
+###### Important for v3:
+If you were using v2 version of this library you must run next code to recreate config file
+
+```bash
+php artisan vendor:publish --tag=datadog --force
+```
+or add next code to existing config 
+```
+'components' => [
+           \AirSlate\Datadog\Components\CacheHitsComponent::class,
+           \AirSlate\Datadog\Components\JobTimingComponent::class,
+           \AirSlate\Datadog\Components\JobQueryCounterComponent::class,
+           \AirSlate\Datadog\Components\TransactionsComponent::class,
+           \AirSlate\Datadog\Components\QueryExecutedComponent::class,
+           \AirSlate\Datadog\Components\CustomEventsComponent::class,
+           \AirSlate\Datadog\Components\MemoryPeakUsageComponent::class,
+           \AirSlate\Datadog\Components\ResponeTimeComponent::class,
+           \AirSlate\Datadog\Components\HttpQueryCounterComponent::class
+       ],
 ```
 
 ## For local, stand-alone service development
@@ -72,52 +97,166 @@ datadog:
     $this->app->tag('datadog.company.tag', DatadogProvider::DATADOG_TAG);
 ```
 
-## Turn on\off default events
 
-Remove FQN event name class from config `datadog.php` to switch off event, or add it back to switch on.
 
 ## Add custom events
 
-You can add your own events which name and custom tags. Just do 2 steps.
-1. Create simple event and implement it of `AirSlate\Datadog\Events\DatadogEventInterface`.
-2. Add your FQN of custom event to config datadog.php in `customEvents` array.
+You can add your own events with name and custom tags. You need: 
+1. Add `AirSlate\Datadog\Events\DatadogEventInterface` or `AirSlate\Datadog\Events\DatadogEventExtendedInterface` interface to you event.
+2. dispatch event by 
+```php
+ event(new YourEvent());
+```
 
-## Statsd metrics
+## Components
+
+This is part of functionality that responsible for processing of the metric.
+You can remove component by removing it from datadog.php config. Below you will find 
+short description of each component.
+   
+Note:
+_{application_namespace} - configurable through config file_
+
+#### Component CacheHitsComponent
+```
+AirSlate\Datadog\Components\CacheHitsComponent
+```
+##### Metrics added by component: 
+- {application_namespace}.cache.item
+    ###### tags: 
+    - status - hit|miss|del|put
+    ###### type
+    - increment
 
 
-### airslate.queue.job(time)
+#### Component HttpQueryCounterComponent
+```
+AirSlate\Datadog\Components\HttpQueryCounterComponent
+```
+##### description
+- sends gauge metric with amount of queries executed during http call
+##### Metrics added by component:
+- {application_namespace}.db.queries
+    ###### tags: 
+    - code - (http status code)
+    - method - (http method)
+    ###### type:
+    - gauge
 
-app - application name
-status - processing status(processed, exceptionOccurred, failed)
-queue - queue name
-task - short class name
-exception - short class name for statuses exceptionOccurred and failed
+#### Component DbTransactionsComponent
+```
+AirSlate\Datadog\Components\DbTransactionsComponent
+```
+##### Metrics added by component:
+- {application_namespace}.db.transaction
+    ###### tags: 
+    - status - begin|commit|rollback
+    ###### type:
+    - increment
+    
+#### Component DbQueryExecutedComponent
+```
+AirSlate\Datadog\Components\DbQueryExecutedComponent
+```
+##### Metrics added by component:
+- {application_namespace}.db.query
+    ###### tags: 
+    - status - executed
+    ###### type:
+    - increment
 
-### airslate.queue.db.queries(time)
+#### Component JobQueryCounterComponent
+```
+AirSlate\Datadog\Components\JobQueryCounterComponent
+```
+##### Metrics added by component:
+- {application_namespace}.queue.db.queries
+    ###### tags: 
+    - status - processed|exceptionOccurred|failed
+    - queue - (queue name)
+    - task - (job name)
+    - exception - (exception class name)
+    ###### type:
+    - gauge
 
-app - application name
-status - processing status(processed, exceptionOccurred, failed)
-queue - queue name
-task - short class name
-exception - short class name for statuses exceptionOccurred and failed
+#### Component JobTimingComponent
+```
+AirSlate\Datadog\Components\JobTimingComponent
+```
+##### Metrics added by component:
+- {application_namespace}.queue.job
+    ###### tags: 
+    - status - processed|exceptionOccurred|failed
+    - queue - (queue name)
+    - task - (job name)
+    - exception - (exception class name)
+    ###### type:
+    - timing
 
-### airslate.response_time(float)
+#### Component JobTimingComponent
+```
+AirSlate\Datadog\Components\JobTimingComponent
+```
+##### Metrics added by component:
+- {application_namespace}.memory_peak_usage
+    ###### tags: 
+    - code - (http response code)
+    - method - (http request method)
+    ###### type:
+    - gauge
+- {application_namespace}.memory_peak_usage_real
+    ###### tags: 
+    - code - (http response code)
+    - method - (http request method)
+    ###### type:
+    - gauge
 
-app - application name
-url - laravel route uri
-method - http request method
-code - http response code
+#### Component MemoryPeakUsageComponent
+```
+AirSlate\Datadog\Components\MemoryPeakUsageComponent
+```
+##### Metrics added by component:
+- {application_namespace}.queue.job
+    ###### tags: 
+    - status - processed|exceptionOccurred|failed
+    - queue - (queue name)
+    - task - (job name)
+    - exception - (exception class name)
+    ###### type:
+    - timing
+    
+#### Component ResponeTimeComponent
+```
+AirSlate\Datadog\Components\ResponeTimeComponent
+```
+##### Metrics added by component:
+- {application_namespace}.response_time
+    ###### tags: 
+    - code - (http response code)
+    - method - (http request method)
+    ###### type:
+    - timing
 
-### airslate.memory_peak_usage(int)
+#### Component CustomEventsComponent
+```
+AirSlate\Datadog\Components\CustomEventsComponent
+```
+##### Description
+- To send simple metric you must implement 
+```AirSlate\Datadog\Events\DatadogEventInterface```
+- To send metric with specific type you must implement 
+```AirSlate\Datadog\Events\DatadogEventExtendedInterface```
 
-app - application name
-url - laravel route uri
-method - http request method
-code - http response code
-
-### airslate.memory_peak_usage_real(int)
-
-app - application name
-url - laravel route uri
-method - http request method
-code - http response code
+ Supported metric types: 
+  -     DatadogEventExtendedInterface::METRIC_TYPE_HISTOGRAM
+  -     DatadogEventExtendedInterface::METRIC_TYPE_INCREMENT
+  -     DatadogEventExtendedInterface::METRIC_TYPE_DECREMENT
+  -     DatadogEventExtendedInterface::METRIC_TYPE_GAUGE
+  -     DatadogEventExtendedInterface::METRIC_TYPE_TIMING
+##### Metrics added by component:
+- {application_namespace}.{$event->getEventCategory()}.{$event->getEventName()}
+    ###### tags: 
+    - code - (http response code)
+    - method - (http request method)
+    ###### type:
+    - timing

@@ -6,7 +6,7 @@ namespace AirSlate\Datadog\Components;
 
 use Illuminate\Database\Events\QueryExecuted;
 
-class QueryExecutedComponent extends ComponentAbstract
+class DbQueryExecutedComponent extends ComponentAbstract
 {
     public function register(): void
     {

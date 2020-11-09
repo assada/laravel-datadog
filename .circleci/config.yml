@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: pdffiller/circleci-php
+    - image: pdffiller/php74-ubuntu18
 
     working_directory: ~/repo
 
@@ -31,6 +31,6 @@ jobs:
     # run tests!
     - run: ./vendor/bin/phpcs
     - run: ./vendor/bin/psalm --show-info=false
-    - run: ./vendor/bin/phpstan a --no-progress ./src
+    - run: ./vendor/bin/phpstan a --no-progress --memory-limit=4G
     - run: mkdir ./tests/app/bootstrap && mkdir ./tests/app/bootstrap/cache
     - run: ./vendor/bin/phpunit tests

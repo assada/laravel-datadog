@@ -9,7 +9,7 @@ use Illuminate\Database\Events\TransactionBeginning;
 use Illuminate\Database\Events\TransactionCommitted;
 use Illuminate\Database\Events\TransactionRolledBack;
 
-class TransactionsComponent extends ComponentAbstract
+class DbTransactionsComponent extends ComponentAbstract
 {
     public function register(): void
     {
