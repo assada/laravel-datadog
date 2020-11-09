@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: pdffiller/php74-ubuntu18
+    - image: pdffiller/circleci-php
 
     working_directory: ~/repo
 
