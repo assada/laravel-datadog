@@ -8,35 +8,16 @@ return [
     'statsd_env' => env('APP_ENV'),
     'is_send_increment_metric_with_timing_metric' => false,
 
-    /*
-    |--------------------------------------------------------------------------
-    | Datadog Events Configuration
-    |--------------------------------------------------------------------------
-    | Sends message to datadog metric when some event calls. Just remove FQN to disable event listening.
-    */
-    'events' => [
-        'defaultEvents' => [
-            AirSlate\EventBusHelper\Events\ProcessedEvent::class,
-            AirSlate\EventBusHelper\Events\RejectedEvent::class,
-            AirSlate\EventBusHelper\Events\RetryEvent::class,
-            AirSlate\EventBusHelper\Events\SendEvent::class,
-            AirSlate\EventBusHelper\Events\SendToQueueEvent::class,
-            Illuminate\Queue\Events\JobProcessing::class,
-            Illuminate\Queue\Events\JobProcessed::class,
-            Illuminate\Queue\Events\JobExceptionOccurred::class,
-            Illuminate\Queue\Events\JobFailed::class,
-            Illuminate\Cache\Events\CacheHit::class,
-            Illuminate\Cache\Events\CacheMissed::class,
-            Illuminate\Cache\Events\KeyForgotten::class,
-            Illuminate\Cache\Events\KeyWritten::class,
-            Illuminate\Database\Events\QueryExecuted::class,
-            Illuminate\Database\Events\TransactionBeginning::class,
-            Illuminate\Database\Events\TransactionCommitted::class,
-            Illuminate\Database\Events\TransactionRolledBack::class,
-        ],
-        'customEvents' => [
-            //Your custom events FQN
-        ]
+    'components' => [
+        \AirSlate\Datadog\Components\CacheHitsComponent::class,
+        \AirSlate\Datadog\Components\JobTimingComponent::class,
+        \AirSlate\Datadog\Components\JobQueryCounterComponent::class,
+        \AirSlate\Datadog\Components\DbTransactionsComponent::class,
+        \AirSlate\Datadog\Components\DbQueryExecutedComponent::class,
+        \AirSlate\Datadog\Components\CustomEventsComponent::class,
+        \AirSlate\Datadog\Components\MemoryPeakUsageComponent::class,
+        \AirSlate\Datadog\Components\ResponeTimeComponent::class,
+        \AirSlate\Datadog\Components\HttpQueryCounterComponent::class
     ],
     'global_tags' => [],
 ];

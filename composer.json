@@ -12,14 +12,13 @@
     ],
     "require": {
         "php": ">=7.1",
-        "datadog/php-datadogstatsd": "1.4.*",
-        "illuminate/routing": "^5.6 || ^6.0 || ^7.0",
-        "illuminate/support": "^5.6 || ^6.0 || ^7.0",
-        "illuminate/events": "^5.6 || ^6.0 || ^7.0"
+        "datadog/php-datadogstatsd": "1.4.*"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "^3.2",
+        "phpstan/phpstan": "^0.12.50",
+        "phpunit/phpunit": "^7.0",
+        "laravel/framework": "^5.6",
         "vimeo/psalm": "^3.0"
     },
     "autoload": {
@@ -27,11 +26,16 @@
             "AirSlate\\Datadog\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "AirSlate\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
                 "AirSlate\\Datadog\\ServiceProviders\\DatadogProvider",
-                "AirSlate\\Datadog\\ServiceProviders\\EventServiceProvider"
+                "AirSlate\\Datadog\\ServiceProviders\\ComponentsProvider"
             ]
         }
     },
