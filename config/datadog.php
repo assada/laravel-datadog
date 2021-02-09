@@ -16,7 +16,7 @@ return [
         \AirSlate\Datadog\Components\DbQueryExecutedComponent::class,
         \AirSlate\Datadog\Components\CustomEventsComponent::class,
         \AirSlate\Datadog\Components\MemoryPeakUsageComponent::class,
-        \AirSlate\Datadog\Components\ResponeTimeComponent::class,
+        \AirSlate\Datadog\Components\ResponseTimeComponent::class,
         \AirSlate\Datadog\Components\HttpQueryCounterComponent::class
     ],
     'global_tags' => [],

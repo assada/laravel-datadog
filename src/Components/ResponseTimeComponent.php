@@ -7,7 +7,7 @@ namespace AirSlate\Datadog\Components;
 use AirSlate\Datadog\Exceptions\ComponentRegistrationException;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 
-class ResponeTimeComponent extends ComponentAbstract
+class ResponseTimeComponent extends ComponentAbstract
 {
     public function register(): void
     {
