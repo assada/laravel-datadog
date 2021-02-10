@@ -21,7 +21,7 @@ class ComponentsProvider extends ServiceProvider
         $this->app->singleton(TimerManager::class);
         $this->app->singleton(CounterManager::class);
 
-        /** @var array $components */
+        /** @var string[] $components */
         $components = $this->app->get('config')->get('datadog.components.all');
 
         $this->registerComponents($components);
