@@ -30,6 +30,7 @@ class CounterManager
     }
 
     /**
+     * @param string $name
      * @return int
      *
      * @throws CounterException
