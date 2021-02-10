@@ -9,7 +9,7 @@ use AirSlate\Datadog\Models\Timer;
 
 class TimerManager
 {
-    /** @var array  */
+    /** @var array<string, Timer>  */
     private $objects = [];
 
     public function startTimer(string $name, string $key = ''): void
@@ -21,11 +21,13 @@ class TimerManager
 
     public function getTimer(string $name, string $key = ''): Timer
     {
-        $timer = $this->objects[$this->getKey($name, $key)];
-        if (!$timer) {
+        $key = $this->getKey($name, $key);
+
+        if (!isset($this->objects[$key])) {
             throw new IntervalException("Interval doesn't exists");
         }
-        return $timer;
+
+        return $this->objects[$key];
     }
 
     public function stopTimer(string $name, string $key = ''): Timer
@@ -35,11 +37,6 @@ class TimerManager
         return $timer;
     }
 
-    /**
-     * @param string $name
-     * @param string $key
-     * @return string
-     */
     private function getKey(string $name, string $key): string
     {
         return 'timer_' . $name . '_' . $key;

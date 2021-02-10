@@ -7,45 +7,48 @@ namespace AirSlate\Datadog\ServiceProviders;
 use AirSlate\Datadog\Components\ComponentInterface;
 use AirSlate\Datadog\Services\CounterManager;
 use AirSlate\Datadog\Services\TimerManager;
-use Illuminate\Config\Repository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 class ComponentsProvider extends ServiceProvider
 {
-    public function register()
+    /**
+     * @throws BindingResolutionException
+     */
+    public function register(): void
     {
-        $this->mergeConfigFrom(
-            $this->configPath(),
-            'datadog'
-        );
-    }
-
-    public function boot(): void
-    {
-        /** @var Repository $config */
         $this->app->singleton(TimerManager::class);
         $this->app->singleton(CounterManager::class);
 
-        $components = $this->app->get('config')->get('datadog.components');
+        /** @var string[] $components */
+        $components = $this->app->get('config')->get('datadog.components.all');
 
-        /** @var string $componentItem */
-        foreach ($components as $componentItem) {
-            $component = $this->app->make($componentItem);
-            if (! $component instanceof ComponentInterface) {
-                throw new \RuntimeException('Component must have ComponentInterface');
-            }
+        $this->registerComponents($components);
 
-            $component->register();
+        if ($this->app->runningInConsole()) {
+            $consoleComponents = $this->app->get('config')->get('datadog.components.console');
+            $this->registerComponents($consoleComponents);
+        } else {
+            $httpComponents = $this->app->get('config')->get('datadog.components.http');
+            $this->registerComponents($httpComponents);
         }
     }
 
     /**
-     * Return config path.
-     *
-     * @return string
+     * @param string[] $components
+     * @throws BindingResolutionException
      */
-    protected function configPath(): string
+    private function registerComponents(array $components): void
     {
-        return __DIR__ . '/../../config/datadog.php';
+        foreach ($components as $componentClass) {
+            $component = $this->app->make($componentClass);
+
+            if (! $component instanceof ComponentInterface) {
+                throw new RuntimeException('Component must have ComponentInterface');
+            }
+
+            $component->register();
+        }
     }
 }

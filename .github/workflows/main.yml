@@ -1,0 +1,32 @@
+name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP, with composer and extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Composer Install Dev
+        run: |
+          composer config --global github-oauth.github.com ${{ secrets.APP_GITHUB_TOKEN }}
+          composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+
+      - name: Run PHP Unit tests
+        run: ./vendor/bin/phpunit
+
+      - name: PHP Code Sniffer
+        run: ./vendor/bin/phpcs
+
+      - name: Psalm
+        run: ./vendor/bin/psalm --show-info=false
+
+      - name: PHPStan
+        run: ./vendor/bin/phpstan a --no-progress

@@ -82,9 +82,8 @@ class DatadogStub extends Datadog
      * @param float $sampleRate
      * @param null $tags
      * @param int $value
-     * @return bool|void
      */
-    public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1)
+    public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1): void
     {
         $this->setStat(
             DatadogEventExtendedInterface::METRIC_TYPE_DECREMENT,
@@ -101,7 +100,7 @@ class DatadogStub extends Datadog
      * @param float $sampleRate
      * @param null $tags
      */
-    public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
+    public function gauge($stat, $value, $sampleRate = 1.0, $tags = null): void
     {
         $this->setStat(
             DatadogEventExtendedInterface::METRIC_TYPE_GAUGE,

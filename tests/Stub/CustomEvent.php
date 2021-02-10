@@ -26,11 +26,13 @@ class CustomEvent implements DatadogEventInterface
         return $this->data['event_name'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getTags(): array
     {
         return [
             'tag_key' => 'tag_value'
         ];
     }
-
 }

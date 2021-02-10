@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AirSlate\Datadog\Components;
 
+use AirSlate\Datadog\Exceptions\CounterException;
 use AirSlate\Datadog\Services\ClassShortener;
 use AirSlate\Datadog\Services\CounterManager;
 use AirSlate\Datadog\Services\Datadog;
@@ -39,15 +40,15 @@ class JobQueryCounterComponent extends ComponentAbstract
 
     public function register(): void
     {
-        $this->listen(JobProcessing::class, function (JobProcessing $jobProcessing) {
+        $this->listen(JobProcessing::class, function (): void {
             $this->counterManager->startCounter($this->getStat('queue.db.queries'));
         });
 
-        $this->listen(QueryExecuted::class, function (QueryExecuted $queryExecuted) {
+        $this->listen(QueryExecuted::class, function (): void {
             $this->counterManager->incrementCounter($this->getStat('queue.db.queries'));
         });
 
-        $this->listen(JobProcessed::class, function (JobProcessed $jobProcessed) {
+        $this->listen(JobProcessed::class, function (JobProcessed $jobProcessed): void {
             $tags = [
                 'status' => 'processed',
                 'queue' => $jobProcessed->job->getQueue(),
@@ -57,7 +58,7 @@ class JobQueryCounterComponent extends ComponentAbstract
             $this->saveStat($tags);
         });
 
-        $this->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
+        $this->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event): void {
             $tags = [
                 'status' => 'exceptionOccurred',
                 'queue' => $event->job->getQueue(),
@@ -68,7 +69,7 @@ class JobQueryCounterComponent extends ComponentAbstract
             $this->saveStat($tags);
         });
 
-        $this->listen(JobFailed::class, function (JobFailed $event) {
+        $this->listen(JobFailed::class, function (JobFailed $event): void {
             $tags = [
                 'status' => 'failed',
                 'queue' => $event->job->getQueue(),
@@ -81,8 +82,8 @@ class JobQueryCounterComponent extends ComponentAbstract
     }
 
     /**
-     * @param array $tags
-     * @throws \AirSlate\Datadog\Exceptions\CounterException
+     * @param array<string, string> $tags
+     * @throws CounterException
      */
     private function saveStat(array $tags): void
     {

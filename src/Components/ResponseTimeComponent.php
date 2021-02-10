@@ -7,7 +7,7 @@ namespace AirSlate\Datadog\Components;
 use AirSlate\Datadog\Exceptions\ComponentRegistrationException;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 
-class ResponeTimeComponent extends ComponentAbstract
+class ResponseTimeComponent extends ComponentAbstract
 {
     public function register(): void
     {
@@ -17,7 +17,7 @@ class ResponeTimeComponent extends ComponentAbstract
         }
         $laravelStart = (float) LARAVEL_START;
 
-        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled) use ($laravelStart) {
+        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled) use ($laravelStart): void {
             $tags = [
                 'code' => $requestHandled->response->getStatusCode(),
                 'method' => $requestHandled->request->method(),

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AirSlate\Tests\Stub;
 
 use AirSlate\Datadog\Events\DatadogEventExtendedInterface;
-use AirSlate\Datadog\Events\DatadogEventInterface;
 
 class ExtendedCustomEvent extends CustomEvent implements DatadogEventExtendedInterface
 {
@@ -18,5 +17,4 @@ class ExtendedCustomEvent extends CustomEvent implements DatadogEventExtendedInt
     {
         return $this->data['metric_type'];
     }
-
 }

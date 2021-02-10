@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AirSlate\Tests\Unit\Components;
 
+use AirSlate\Datadog\Components\CustomEventsComponent;
 use AirSlate\Datadog\Events\DatadogEventExtendedInterface;
 use AirSlate\Tests\Stub\CustomEvent;
 use AirSlate\Tests\Stub\ExtendedCustomEvent;
@@ -11,45 +12,52 @@ use AirSlate\Tests\Unit\BaseTestCase;
 
 class CustomEventsComponentTest extends BaseTestCase
 {
-    /**
-     * @test
-     */
-    public function checkCustomEvent()
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->make(CustomEventsComponent::class)->register();
+    }
+
+    public function testCheckCustomEvent(): void
     {
         $customEvent = new CustomEvent([
             'event_category' => 'event.category',
             'event_name' => 'event.name',
         ]);
+
         event($customEvent);
+
         $increments = $this->datastub->getIncrements(
             "airslate.{$customEvent->getEventCategory()}.{$customEvent->getEventName()}"
         );
-        $this->assertTrue(isset($increments[0]));
-        $this->assertEquals($customEvent->getTags(), $increments[0]['tags']);
+
+        self::assertTrue(isset($increments[0]));
+        self::assertEquals($customEvent->getTags(), $increments[0]['tags']);
     }
 
     /**
-     * @test
      * @dataProvider extendedEvents
      */
-    public function checkExtendedCustomEvent(DatadogEventExtendedInterface $customEvent)
+    public function testCheckExtendedCustomEvent(DatadogEventExtendedInterface $customEvent): void
     {
         event($customEvent);
+
         $metric = $this->datastub->getMetric(
             $customEvent->getMetricType(),
             "airslate.{$customEvent->getEventCategory()}.{$customEvent->getEventName()}"
         );
 
-        $this->assertTrue(isset($metric[0]));
-        $this->assertEquals($customEvent->getTags(), $metric[0]['tags']);
+        self::assertTrue(isset($metric[0]));
+        self::assertEquals($customEvent->getTags(), $metric[0]['tags']);
 
-        $this->assertEquals(
+        self::assertEquals(
             $customEvent->getValue(),
             $metric[0]['value']
         );
     }
 
-    public function extendedEvents()
+    public function extendedEvents(): array
     {
         return [
             [

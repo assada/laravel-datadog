@@ -28,7 +28,6 @@ class HttpQueryCounterComponent extends ComponentAbstract
         $this->counterManager = $counterManager;
     }
 
-
     public function register(): void
     {
         if ($this->app->runningInConsole()) {
@@ -37,11 +36,11 @@ class HttpQueryCounterComponent extends ComponentAbstract
 
         $this->counterManager->startCounter($this->getStat('db.queries'));
 
-        $this->listen(QueryExecuted::class, function (QueryExecuted $queryExecuted) {
+        $this->listen(QueryExecuted::class, function (): void {
             $this->counterManager->incrementCounter($this->getStat('db.queries'));
         });
 
-        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled) {
+        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled): void {
             $tags = [
                 'code' => $requestHandled->response->getStatusCode(),
                 'method' => $requestHandled->request->method(),

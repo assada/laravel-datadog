@@ -30,7 +30,7 @@ class DatadogProvider extends ServiceProvider
         /** @var Repository $config */
         $config = $this->app->get('config');
 
-        $this->app->singleton(Datadog::class, function () use ($config) {
+        $this->app->singleton(Datadog::class, function () use ($config): Datadog {
             $datadog = new Datadog(
                 [
                     'host' => $config->get('datadog.statsd_server', '172.17.0.1'),
@@ -92,7 +92,7 @@ class DatadogProvider extends ServiceProvider
      */
     protected function registerRouteMatchedListener(Datadog $datadog): void
     {
-        $this->app->make('router')->matched(static function (RouteMatched $matched) use ($datadog) {
+        $this->app->make('router')->matched(static function (RouteMatched $matched) use ($datadog): void {
             $datadog->addTag('url', $matched->route->uri);
         });
     }

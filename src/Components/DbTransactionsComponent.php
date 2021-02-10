@@ -16,19 +16,19 @@ class DbTransactionsComponent extends ComponentAbstract
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->get(Dispatcher::class);
 
-        $dispatcher->listen(TransactionBeginning::class, function (TransactionBeginning $transactionBeginning) {
+        $dispatcher->listen(TransactionBeginning::class, function (): void {
             $this->statsd->increment($this->getStat('db.transaction'), 1, [
                 'status' => 'begin',
             ]);
         });
 
-        $dispatcher->listen(TransactionCommitted::class, function (TransactionCommitted $transactionCommitted) {
+        $dispatcher->listen(TransactionCommitted::class, function (): void {
             $this->statsd->increment($this->getStat('db.transaction'), 1, [
                 'status' => 'commit',
             ]);
         });
 
-        $dispatcher->listen(TransactionRolledBack::class, function (TransactionRolledBack $transactionRolledBack) {
+        $dispatcher->listen(TransactionRolledBack::class, function (): void {
             $this->statsd->increment($this->getStat("db.transaction"), 1, [
                 'status' => 'rollback',
             ]);
