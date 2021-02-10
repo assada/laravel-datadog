@@ -52,16 +52,22 @@ php artisan vendor:publish --tag=datadog --force
 or add next code to existing config 
 ```
 'components' => [
-           \AirSlate\Datadog\Components\CacheHitsComponent::class,
-           \AirSlate\Datadog\Components\JobTimingComponent::class,
-           \AirSlate\Datadog\Components\JobQueryCounterComponent::class,
-           \AirSlate\Datadog\Components\TransactionsComponent::class,
-           \AirSlate\Datadog\Components\QueryExecutedComponent::class,
-           \AirSlate\Datadog\Components\CustomEventsComponent::class,
-           \AirSlate\Datadog\Components\MemoryPeakUsageComponent::class,
-           \AirSlate\Datadog\Components\ResponeTimeComponent::class,
-           \AirSlate\Datadog\Components\HttpQueryCounterComponent::class
-       ],
+    'http' => [
+        \AirSlate\Datadog\Components\ResponseTimeComponent::class,
+        \AirSlate\Datadog\Components\HttpQueryCounterComponent::class,
+    ],
+    'console' => [
+        \AirSlate\Datadog\Components\JobTimingComponent::class,
+        \AirSlate\Datadog\Components\JobQueryCounterComponent::class,
+    ],
+    'all' => [
+        \AirSlate\Datadog\Components\CacheHitsComponent::class,
+        \AirSlate\Datadog\Components\DbTransactionsComponent::class,
+        \AirSlate\Datadog\Components\DbQueryExecutedComponent::class,
+        \AirSlate\Datadog\Components\CustomEventsComponent::class,
+        \AirSlate\Datadog\Components\MemoryPeakUsageComponent::class,
+    ]
+],
 ```
 
 ## For local, stand-alone service development
@@ -225,9 +231,9 @@ AirSlate\Datadog\Components\MemoryPeakUsageComponent
     ###### type:
     - timing
     
-#### Component ResponeTimeComponent
+#### Component ResponseTimeComponent
 ```
-AirSlate\Datadog\Components\ResponeTimeComponent
+AirSlate\Datadog\Components\ResponseTimeComponent
 ```
 ##### Metrics added by component:
 - {application_namespace}.response_time
