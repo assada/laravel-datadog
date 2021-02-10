@@ -5,28 +5,42 @@ declare(strict_types=1);
 namespace AirSlate\Datadog\ServiceProviders;
 
 use AirSlate\Datadog\Components\ComponentInterface;
-use AirSlate\Datadog\Components\ResponseTimeComponent;
 use AirSlate\Datadog\Services\CounterManager;
 use AirSlate\Datadog\Services\TimerManager;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
 
 class ComponentsProvider extends ServiceProvider
 {
+    /**
+     * @throws BindingResolutionException
+     */
     public function register(): void
     {
         $this->app->singleton(TimerManager::class);
         $this->app->singleton(CounterManager::class);
 
-        $components = $this->app->get('config')->get('datadog.components');
+        /** @var array $components */
+        $components = $this->app->get('config')->get('datadog.components.all');
 
-        /** @var string $componentItem */
-        foreach ($components as $componentItem) {
-            if ($componentItem === ResponseTimeComponent::class && $this->app->runningInConsole()) {
-                continue;
-            }
+        $this->registerComponents($components);
 
-            $component = $this->app->make($componentItem);
+        if ($this->app->runningInConsole() === false) {
+            $httpComponents = $this->app->get('config')->get('datadog.components.http');
+
+            $this->registerComponents($httpComponents);
+        }
+    }
+
+    /**
+     * @param string[] $components
+     * @throws BindingResolutionException
+     */
+    private function registerComponents(array $components): void
+    {
+        foreach ($components as $componentClass) {
+            $component = $this->app->make($componentClass);
 
             if (! $component instanceof ComponentInterface) {
                 throw new RuntimeException('Component must have ComponentInterface');
