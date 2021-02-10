@@ -1,11 +1,11 @@
-# Datadog middleware helper for laravel 
+# Datadog helper library for laravel
 
-This project makes it simple to integrate Datadog into your.
+This library makes it simple to integrate Datadog into your laravel project
 
 ## Requirements
 
 - PHP >= 7.1
-- Laravel Framework 5.6.*
+- Laravel Framework ^5.6, ^6.0, ^7.0
 
 ## Installation
 
