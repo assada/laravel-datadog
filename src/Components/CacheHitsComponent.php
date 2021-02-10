@@ -9,33 +9,29 @@ use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Cache\Events\KeyForgotten;
 use Illuminate\Cache\Events\KeyWritten;
 
-/**
- * Class CacheHitsComponent
- * @package AirSlate\Datadog\Components
- */
 class CacheHitsComponent extends ComponentAbstract
 {
     public function register(): void
     {
-        $this->listen(CacheHit::class, function (CacheHit $cacheHit) {
+        $this->listen(CacheHit::class, function (): void {
             $this->statsd->increment($this->getStat('cache.item'), 1, [
                 'status' => 'hit',
             ]);
         });
 
-        $this->listen(CacheMissed::class, function (CacheMissed $cacheMissed) {
+        $this->listen(CacheMissed::class, function (): void {
             $this->statsd->increment($this->getStat('cache.item'), 1, [
                 'status' => 'miss',
             ]);
         });
 
-        $this->listen(KeyForgotten::class, function (KeyForgotten $keyForgotten) {
+        $this->listen(KeyForgotten::class, function (): void {
             $this->statsd->increment($this->getStat('cache.item'), 1, [
                 'status' => 'del',
             ]);
         });
 
-        $this->listen(KeyWritten::class, function (KeyWritten $keyWritten) {
+        $this->listen(KeyWritten::class, function (): void {
             $this->statsd->increment($this->getStat('cache.item'), 1, [
                 'status' => 'put',
             ]);

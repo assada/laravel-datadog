@@ -4,29 +4,47 @@ declare(strict_types=1);
 
 namespace AirSlate\Tests\Unit\Components;
 
+use AirSlate\Datadog\Components\DbTransactionsComponent;
 use AirSlate\Tests\Unit\BaseTestCase;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Events\TransactionBeginning;
 use Illuminate\Database\Events\TransactionCommitted;
 use Illuminate\Database\Events\TransactionRolledBack;
 
 class TransactionComponentTest extends BaseTestCase
 {
-    /**
-     * @dataProvider provideEvents
-     */
-    public function testTransaction($startEvent, $endEvent, $startTags, $endTags)
+    public function setUp(): void
     {
-        event($startEvent);
-        event($endEvent);
-        $increments = $this->datastub->getIncrements('airslate.db.transaction');
-        $this->assertEquals(2, count($increments));
-        $this->assertEquals($startTags, $increments[0]['tags']);
-        $this->assertEquals($endTags, $increments[1]['tags']);
+        parent::setUp();
+
+        $this->app->make(DbTransactionsComponent::class)->register();
     }
 
-    public function provideEvents()
+    /**
+     * @dataProvider provideEvents
+     *
+     * @param $startEvent
+     * @param $endEvent
+     * @param $startTags
+     * @param $endTags
+     */
+    public function testTransaction($startEvent, $endEvent, $startTags, $endTags): void
     {
-        $connection = $this->createConnectionMock();
+        event($startEvent);
+
+        event($endEvent);
+
+        $increments = $this->datastub->getIncrements('airslate.db.transaction');
+
+        self::assertCount(2, $increments);
+        self::assertEquals($startTags, $increments[0]['tags']);
+        self::assertEquals($endTags, $increments[1]['tags']);
+    }
+
+    public function provideEvents(): array
+    {
+        $connection = $this->createMock(Connection::class);
+
         return [
             [
                 new TransactionBeginning($connection),

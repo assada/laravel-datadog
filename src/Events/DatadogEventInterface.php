@@ -1,10 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AirSlate\Datadog\Events;
 
-/**
- * Interface DatadogEventInterface
- */
 interface DatadogEventInterface
 {
     /**
@@ -12,7 +11,6 @@ interface DatadogEventInterface
      * @return string
      */
     public function getEventCategory(): string;
-
 
     /**
      * Event name may be something lke transaction/query/item etc...
@@ -22,7 +20,7 @@ interface DatadogEventInterface
 
     /**
      * For example: ['tagNeme1' => 'tagValue1', 'tagName2' => 'tagValue2']
-     * @return array
+     * @return array<string, string>
      */
     public function getTags(): array;
 }

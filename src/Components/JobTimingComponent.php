@@ -37,11 +37,11 @@ class JobTimingComponent extends ComponentAbstract
 
     public function register(): void
     {
-        $this->listen(JobProcessing::class, function (JobProcessing $jobProcessing) {
+        $this->listen(JobProcessing::class, function (): void {
             $this->timerManager->startTimer($this->getStat('queue.job'));
         });
 
-        $this->listen(JobProcessed::class, function (JobProcessed $jobProcessed) {
+        $this->listen(JobProcessed::class, function (JobProcessed $jobProcessed): void {
             $tags = [
                 'status' => 'processed',
                 'queue' => $jobProcessed->job->getQueue(),
@@ -52,13 +52,13 @@ class JobTimingComponent extends ComponentAbstract
 
             $this->statsd->timing(
                 $this->getStat('queue.job'),
-                $timer->getInteval(),
+                $timer->getInterval(),
                 1,
                 $tags
             );
         });
 
-        $this->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
+        $this->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event): void {
             $tags = [
                 'status' => 'exceptionOccurred',
                 'queue' => $event->job->getQueue(),
@@ -70,13 +70,13 @@ class JobTimingComponent extends ComponentAbstract
 
             $this->statsd->timing(
                 $this->getStat('queue.job'),
-                $timer->getInteval(),
+                $timer->getInterval(),
                 1,
                 $tags
             );
         });
 
-        $this->listen(JobFailed::class, function (JobFailed $event) {
+        $this->listen(JobFailed::class, function (JobFailed $event): void {
             $tags = [
                 'status' => 'failed',
                 'queue' => $event->job->getQueue(),
@@ -88,7 +88,7 @@ class JobTimingComponent extends ComponentAbstract
 
             $this->statsd->timing(
                 $this->getStat('queue.job'),
-                $timer->getInteval(),
+                $timer->getInterval(),
                 1,
                 $tags
             );

@@ -1,7 +1,7 @@
 # PHP CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-php/ for more details
-# DEPRECATED!!!
+# Deprecated!!!
 #
 version: 2
 jobs:
@@ -33,5 +33,4 @@ jobs:
     - run: ./vendor/bin/phpcs
     - run: ./vendor/bin/psalm --show-info=false
     - run: ./vendor/bin/phpstan a --no-progress --memory-limit=4G ./src
-    - run: mkdir ./tests/app/bootstrap && mkdir ./tests/app/bootstrap/cache
     - run: ./vendor/bin/phpunit tests

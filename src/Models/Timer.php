@@ -9,10 +9,10 @@ use AirSlate\Datadog\Exceptions\IntervalException;
 class Timer
 {
     /** @var float */
-    private $start = 0;
+    private $start = 0.0;
 
     /** @var float */
-    private $stop = 0;
+    private $stop = 0.0;
 
     public function start(): void
     {
@@ -21,16 +21,16 @@ class Timer
 
     public function stop(): void
     {
-        if (!$this->start) {
-            new IntervalException('You must start interval before stopping');
+        if ($this->start === 0.0) {
+            throw new IntervalException('You must start interval before stopping');
         }
         $this->stop = microtime(true);
     }
 
-    public function getInteval(): float
+    public function getInterval(): float
     {
-        if (!$this->stop || !$this->start) {
-            new IntervalException('You must start and stop timer before getting interval');
+        if ($this->stop === 0.0 || $this->start === 0.0) {
+            throw new IntervalException('You must start and stop timer before getting interval');
         }
 
         return $this->stop - $this->start;

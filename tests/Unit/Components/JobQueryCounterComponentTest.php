@@ -6,90 +6,106 @@ namespace AirSlate\Tests\Unit\Components;
 
 use AirSlate\Datadog\Components\JobQueryCounterComponent;
 use AirSlate\Datadog\Services\ClassShortener;
-use AirSlate\Tests\Stub\TestException;
+use AirSlate\Tests\InteractsWithQueryExecuted;
 use AirSlate\Tests\Unit\BaseTestCase;
-use Illuminate\Database\Connection;
-use Illuminate\Database\Events\QueryExecuted;
+use Exception;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Jobs\RedisJob;
 
 class JobQueryCounterComponentTest extends BaseTestCase
 {
-    /**
-     * @dataProvider provideEvents
-     */
-    public function testSuccess($jobStarted, $jobEnded, $tags)
-    {
-        event($jobStarted);
-        $this->riseEventQueryExecuted();
-        event($jobEnded);
-        $gauges = $this->datastub->getGauges('airslate.queue.db.queries');
+    use InteractsWithQueryExecuted;
 
-        $this->assertEquals(1, count($gauges));
-        $this->assertEquals($tags, $gauges[0]['tags']);
-        $this->assertEquals(1, $gauges[0]['value']);
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->make(JobQueryCounterComponent::class)->register();
     }
 
     /**
+     * @dataProvider provideEvents
      *
-     * @dataProvider provideEvents
+     * @param $jobStarted
+     * @param $jobEnded
+     * @param $tags
      */
-    public function testTwoCalls($jobStarted, $jobEnded, $tags)
+    public function testSuccess($jobStarted, $jobEnded, $tags): void
     {
         event($jobStarted);
-        $this->riseEventQueryExecuted();
+        $this->riseQueryExecutedEvent();
+        event($jobEnded);
+        $gauges = $this->datastub->getGauges('airslate.queue.db.queries');
+
+        self::assertCount(1, $gauges);
+        self::assertEquals($tags, $gauges[0]['tags']);
+        self::assertEquals(1, $gauges[0]['value']);
+    }
+
+    /**
+     * @dataProvider provideEvents
+     *
+     * @param $jobStarted
+     * @param $jobEnded
+     * @param $tags
+     */
+    public function testTwoCalls($jobStarted, $jobEnded, $tags): void
+    {
+        event($jobStarted);
+        $this->riseQueryExecutedEvent();
         event($jobEnded);
         event($jobStarted);
-        $this->riseEventQueryExecuted();
-        $this->riseEventQueryExecuted();
+        $this->riseQueryExecutedEvent();
+        $this->riseQueryExecutedEvent();
         event($jobEnded);
 
         $gauges = $this->datastub->getGauges('airslate.queue.db.queries');
 
-        $this->assertEquals(2, count($gauges));
-        $this->assertEquals($tags, $gauges[0]['tags']);
-        $this->assertEquals($tags, $gauges[1]['tags']);
-        $this->assertEquals(1, $gauges[0]['value']);
-        $this->assertEquals(2, $gauges[1]['value']);
+        self::assertCount(2, $gauges);
+        self::assertEquals($tags, $gauges[0]['tags']);
+        self::assertEquals($tags, $gauges[1]['tags']);
+        self::assertEquals(1, $gauges[0]['value']);
+        self::assertEquals(2, $gauges[1]['value']);
     }
 
-    public function provideEvents()
+    public function provideEvents(): array
     {
-        $this->jobMock = $this->createJobMock();
+        $jobMock =  $this->createMock(RedisJob::class);
+        $jobMock->method('resolveName')->willReturn('redisJob');
 
         return [
             [
-                new JobProcessing('test', $this->jobMock),
-                new JobProcessed('test', $this->jobMock),
+                new JobProcessing('test', $jobMock),
+                new JobProcessed('test', $jobMock),
                 [
                     'status' => 'processed',
-                    'queue' => $this->jobMock->getQueue(),
-                    'task' => (new ClassShortener())->shorten($this->jobMock->resolveName())
+                    'queue' => $jobMock->getQueue(),
+                    'task' => (new ClassShortener())->shorten($jobMock->resolveName())
                 ]
             ],
             [
-                new JobProcessing('test', $this->jobMock),
-                new JobFailed('test', $this->jobMock, new TestException('test exception')),
+                new JobProcessing('test', $jobMock),
+                new JobFailed('test', $jobMock, new Exception('test exception')),
                 [
                     'status' => 'failed',
-                    'queue' => $this->jobMock->getQueue(),
-                    'task' => (new ClassShortener())->shorten($this->jobMock->resolveName()),
-                    'exception' => (new ClassShortener())->shorten(get_class(new TestException('test exception')))
+                    'queue' => $jobMock->getQueue(),
+                    'task' => (new ClassShortener())->shorten($jobMock->resolveName()),
+                    'exception' => (new ClassShortener())->shorten(get_class(new Exception('test exception')))
                 ]
             ],
             [
-                new JobProcessing('test', $this->jobMock),
-                new JobExceptionOccurred('test', $this->jobMock, new TestException('test exception')),
+                new JobProcessing('test', $jobMock),
+                new JobExceptionOccurred('test', $jobMock, new Exception('test exception')),
                 [
                     'status' => 'exceptionOccurred',
-                    'queue' => $this->jobMock->getQueue(),
-                    'task' => (new ClassShortener())->shorten($this->jobMock->resolveName()),
-                    'exception' => (new ClassShortener())->shorten(get_class(new TestException('test exception')))
+                    'queue' => $jobMock->getQueue(),
+                    'task' => (new ClassShortener())->shorten($jobMock->resolveName()),
+                    'exception' => (new ClassShortener())->shorten(get_class(new Exception('test exception')))
                 ]
             ]
         ];
     }
-
 }

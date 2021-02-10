@@ -1,10 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AirSlate\Datadog\Events;
 
-/**
- * interface DatadogEventAbstract
- */
 interface DatadogEventExtendedInterface extends DatadogEventInterface
 {
     public const METRIC_TYPE_HISTOGRAM = 'histogram';

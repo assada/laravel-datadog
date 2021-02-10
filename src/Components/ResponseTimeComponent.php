@@ -17,7 +17,7 @@ class ResponseTimeComponent extends ComponentAbstract
         }
         $laravelStart = (float) LARAVEL_START;
 
-        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled) use ($laravelStart) {
+        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled) use ($laravelStart): void {
             $tags = [
                 'code' => $requestHandled->response->getStatusCode(),
                 'method' => $requestHandled->request->method(),

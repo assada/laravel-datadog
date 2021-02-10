@@ -8,19 +8,13 @@ use AirSlate\Datadog\Components\ComponentInterface;
 use AirSlate\Datadog\Components\ResponseTimeComponent;
 use AirSlate\Datadog\Services\CounterManager;
 use AirSlate\Datadog\Services\TimerManager;
-use Illuminate\Config\Repository;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 class ComponentsProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(
-            $this->configPath(),
-            'datadog'
-        );
-
-        /** @var Repository $config */
         $this->app->singleton(TimerManager::class);
         $this->app->singleton(CounterManager::class);
 
@@ -35,20 +29,10 @@ class ComponentsProvider extends ServiceProvider
             $component = $this->app->make($componentItem);
 
             if (! $component instanceof ComponentInterface) {
-                throw new \RuntimeException('Component must have ComponentInterface');
+                throw new RuntimeException('Component must have ComponentInterface');
             }
 
             $component->register();
         }
-    }
-
-    /**
-     * Return config path.
-     *
-     * @return string
-     */
-    protected function configPath(): string
-    {
-        return __DIR__ . '/../../config/datadog.php';
     }
 }

@@ -12,8 +12,7 @@ class CustomEventsComponent extends ComponentAbstract
 {
     public function register(): void
     {
-        /** @var string $eventName */
-        $this->listen('*', function (string $eventName, array $data) {
+        $this->listen('*', function (string $eventName, array $data): void {
             $event = $data[0];
 
             if (!$event instanceof DatadogEventInterface) {

@@ -10,7 +10,7 @@ class DbQueryExecutedComponent extends ComponentAbstract
 {
     public function register(): void
     {
-        $this->listen(QueryExecuted::class, function (QueryExecuted $queryExecuted) {
+        $this->listen(QueryExecuted::class, function (): void {
             $this->statsd->increment($this->getStat('db.query'), 1, [
                 'status' => 'executed',
             ]);

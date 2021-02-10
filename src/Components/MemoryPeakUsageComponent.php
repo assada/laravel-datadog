@@ -10,14 +10,14 @@ class MemoryPeakUsageComponent extends ComponentAbstract
 {
     public function register(): void
     {
-        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled) {
+        $this->listen(RequestHandled::class, function (RequestHandled $requestHandled): void {
             $tags = [
                 'code' => $requestHandled->response->getStatusCode(),
                 'method' => $requestHandled->request->method(),
             ];
 
             $this->statsd->gauge(
-                $this->getStat("memory_peak_usage"),
+                $this->getStat('memory_peak_usage'),
                 memory_get_peak_usage(false),
                 1,
                 $tags
