@@ -26,9 +26,11 @@ class ComponentsProvider extends ServiceProvider
 
         $this->registerComponents($components);
 
-        if ($this->app->runningInConsole() === false) {
+        if ($this->app->runningInConsole()) {
+            $consoleComponents = $this->app->get('config')->get('datadog.components.console');
+            $this->registerComponents($consoleComponents);
+        } else {
             $httpComponents = $this->app->get('config')->get('datadog.components.http');
-
             $this->registerComponents($httpComponents);
         }
     }
