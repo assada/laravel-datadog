@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace AirSlate\Tests\Unit\Components;
 
-use AirSlate\Datadog\Components\MemoryPeakUsageComponent;
+use AirSlate\Datadog\Components\HttpMemoryUsageComponent;
 use AirSlate\Tests\Unit\BaseTestCase;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class MemoryPeakUsageComponentTest extends BaseTestCase
+class HttpMemoryUsageComponentTest extends BaseTestCase
 {
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->app->make(MemoryPeakUsageComponent::class)->register();
+        $this->app->make(HttpMemoryUsageComponent::class)->register();
     }
 
     public function testPeakMemory(): void

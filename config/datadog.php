@@ -12,6 +12,7 @@ return [
         'http' => [
             \AirSlate\Datadog\Components\ResponseTimeComponent::class,
             \AirSlate\Datadog\Components\HttpQueryCounterComponent::class,
+            \AirSlate\Datadog\Components\HttpMemoryUsageComponent::class,
         ],
         'console' => [
             \AirSlate\Datadog\Components\JobTimingComponent::class,
@@ -22,7 +23,6 @@ return [
             \AirSlate\Datadog\Components\DbTransactionsComponent::class,
             \AirSlate\Datadog\Components\DbQueryExecutedComponent::class,
             \AirSlate\Datadog\Components\CustomEventsComponent::class,
-            \AirSlate\Datadog\Components\MemoryPeakUsageComponent::class,
         ]
     ],
     'global_tags' => [],

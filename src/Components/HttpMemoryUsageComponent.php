@@ -6,7 +6,7 @@ namespace AirSlate\Datadog\Components;
 
 use Illuminate\Foundation\Http\Events\RequestHandled;
 
-class MemoryPeakUsageComponent extends ComponentAbstract
+class HttpMemoryUsageComponent extends ComponentAbstract
 {
     public function register(): void
     {
