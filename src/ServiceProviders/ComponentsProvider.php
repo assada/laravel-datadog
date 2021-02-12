@@ -13,14 +13,17 @@ use RuntimeException;
 
 class ComponentsProvider extends ServiceProvider
 {
-    /**
-     * @throws BindingResolutionException
-     */
     public function register(): void
     {
         $this->app->singleton(TimerManager::class);
         $this->app->singleton(CounterManager::class);
+    }
 
+    /**
+     * @throws BindingResolutionException
+     */
+    public function boot(): void
+    {
         /** @var string[] $components */
         $components = $this->app->get('config')->get('datadog.components.all');
 
