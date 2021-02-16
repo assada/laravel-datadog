@@ -1,5 +1,5 @@
 {
-    "name": "assada/laravel-datadog",
+    "name": "airslate/laravel-datadog",
     "description": "AirSlate DataDog Client",
     "type": "library",
     "license": "proprietary",
